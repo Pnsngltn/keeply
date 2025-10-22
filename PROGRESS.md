@@ -2,8 +2,8 @@
 
 ## MVP Features
 
-- [ ] Flask app setup
-- [ ] SQLite database setup
+- [x] Flask app setup
+- [x] SQLite database setup
 - [ ] User registration and login
 - [ ] Booking page for clients
 - [ ] Admin dashboard
