@@ -33,7 +33,7 @@ It allows clients to book directly and admins to manage schedules efficiently.
 ---
 
 ## Project Structure
-``
+```
 keeply/
 │
 ├─ app.py # Flask app routes
@@ -55,7 +55,7 @@ keeply/
 │
 ├─ README.md
 ├─ LOG.md / PROGRESS.md # Optional development tracking
-`
+```
 ---
 
 ## Installation / Setup
