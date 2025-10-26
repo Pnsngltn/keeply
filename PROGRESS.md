@@ -4,7 +4,9 @@
 
 - [x] Flask app setup
 - [x] SQLite database setup
-- [ ] User registration and login
+- [x] User login Route
+- [ ] User registration Route
+- [ ] User registration
 - [ ] Booking page for clients
 - [ ] Admin dashboard
 - [ ] Availability management (select timeslots)

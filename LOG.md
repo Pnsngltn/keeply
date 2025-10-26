@@ -8,4 +8,7 @@
           - Configured Flask-Mail
           - Configured app to no cache information
 
+## 2025-10-26
+
+-app.py: - Configured /login route
 
