@@ -10,5 +10,7 @@
 
 ## 2025-10-26
 
--app.py: - Configured /login route
+- app.py: - Configured /login route
 
+- login.html: - Extended Layout page
+              - Added Login form
