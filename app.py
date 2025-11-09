@@ -7,7 +7,7 @@ from flask_mail import Mail, Message
 from flask_session import Session
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from helper import *
+from helper import login_required, conflict
 
 # Configure application
 app = Flask(__name__)
@@ -37,11 +37,7 @@ def after_request(response):
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
-# Route for Homepage ===========================================================
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-# ========= Register ( FIX ) ===========================================================
+# ============ Register ========================================================
 # ------------------------------------------------------------------------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -53,15 +49,14 @@ def register():
         confirmation = request.form.get("confirmation")
         email = request.form.get("email")
         phone = request.form.get("phone")
-        duration = request.form.get("duration")  # in minutes
 
         # Validate input
-        if not username or not password or not confirmation or not email or not phone or not duration:
+        if not username or not password or not confirmation or not email or not phone:
             return render_template("register.html", error="All fields are required")
 
         if password != confirmation:
             return render_template("register.html", error="Passwords do not match")
-
+        
         # Check if username or email already exists
         if db.execute("SELECT * FROM users WHERE username = ?", username):
             return render_template("register.html", error="Username already taken")
@@ -73,8 +68,8 @@ def register():
 
         # Insert user
         db.execute(
-            "INSERT INTO users (username, pwd_hash, email, phone, duration) VALUES (?, ?, ?, ?, ?)",
-            username, pwd_hash, email, phone, duration
+            "INSERT INTO users (username, pwd_hash, email, phone) VALUES (?, ?, ?, ?)",
+            username, pwd_hash, email, phone
         )
 
         # Automatically log in new user
@@ -112,8 +107,9 @@ def login():
                 )
 
         # Ensure username exists and password is correct
+        # Note: during registration the hashed password is stored in `pwd_hash`
         if len(rows) != 1 or not check_password_hash(
-                rows[0]["password"], request.form.get("password")
+                rows[0]["pwd_hash"], request.form.get("password")
                 ):
             return render_template("login.html", error="Invalid username or password")
 
@@ -124,13 +120,48 @@ def login():
         return redirect("/dashboard")
     else:
         return render_template("login.html")
+
+# ------------------------------------------------------------------------------
+# ========== Profile ===========================================================
+# ------------------------------------------------------------------------------
+@app.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    user_id = session["user_id"]
+    rows = db.execute("SELECT username, email, phone FROM users WHERE id = ?", user_id)
+    if not rows:
+        return "User not Found", 404
+    user_info = rows[0]
+
+    if request.method == "POST":
+        name = request.form.get("name")
+        description = request.form.get("description")
+        price = request.form.get("price")
+
+        if not name or not price or not description:
+            error = "All fields required."
+            # Fetch user info and services to render an error template
+            services = db.execute("SELECT id, name, description, price FROM services WHERE user_id = ?", user_id)
+            return render_template("profile.html", user=user_info, services=services, error=error)
+
+        # Insert new service
+        db.execute(
+            "INSERT INTO services (user_id, name, description, price) VALUES (?, ?, ?, ?)",
+            user_id, name, description, price
+        )
+        return redirect("/profile")
+    
+    # GET request: Show Profile
+    services = db.execute("SELECT id, name, description, price FROM services WHERE user_id = ?", user_id)
+
+    return render_template("profile.html", user=user_info, services=services)             
+
 # ------------------------------------------------------------------------------
 # ======== Dashboard ===========================================================
 # ------------------------------------------------------------------------------
 @app.route("/dashboard")
+@login_required
 def dashboard():
-    if "user_id" not in session:
-        return redirect("/login")
     user_id = session["user_id"]
     services = db.execute("SELECT * FROM services WHERE user_id = ?", user_id)
     slots = db.execute("SELECT * FROM timeslots WHERE user_id = ?", user_id)
@@ -143,22 +174,77 @@ def dashboard():
 # ========= Availability =======================================================
 # ------------------------------------------------------------------------------
 @app.route("/availability", methods=["GET", "POST"])
+@login_required
 def availability():
-    if "user_id" not in session:
-        return redirect("login")
+    """Set the available timeslots"""
+
     user_id = session["user_id"]
-    duration = db.execute("SELECT duration FROM users WHERE id = ?", user_id)[0]["duration"]
     
     if request.method == "POST":
         date = request.form.get("date")
-        start_time = request.form.get("time_start")
-        h, m = map(int, start_time.split(":"))
-        end_minutes = h * 60 + m + duration
-        end_time = f"{end_minutes // 60 : 02d}:{end_minutes % 60 : 02d}"
-        db.execute("INSERT INTO timeslots (user_id, date, time_start, time_end) VALUES (?, ?, ?, ?)",
-                   user_id, date, start_time, end_time)
+        start = request.form.get("time_start")
+        end = request.form.get("time_end")
+        duration = request.form.get("duration")
 
-    slots = db.execute("SELECT * FROM timeslots WHERE user_id = ?", user_id)
+        if not date or not start or not end or not duration:
+            return render_template(
+                "availability.html",
+                error="Please fill all fields",
+                    slots=db.execute("SELECT * FROM timeslots where user_id = ? ORDER BY date, time_start", user_id)
+            )
+        duration = int(duration)
+
+        # Convert to minutes since midnight
+        sh, sm = map(int, start.split(":"))
+        eh, em = map(int, end.split(":"))
+        start_min = sh * 60 + sm
+        end_min = eh * 60 + em
+
+        # Handle wrap around midnight
+        total_minutes = end_min - start_min if end_min > start_min else (24 * 60 - start_min) + end_min
+
+        # Find existing slots for that date
+        existing = db.execute("SELECT time_start, time_end FROM timeslots WHERE user_id = ? AND date = ?", user_id, date)
+
+        existing_ranges = []
+        for row in existing:
+            sh, sm = map(int, row["time_start"].split(":"))
+            eh, em = map(int, row["time_send"].split(":"))
+            existing_ranges.append((sh * 60 + sm, eh * 60 + em))
+
+        # Generate slots and check conflicts
+        current = start_min 
+        created, conflicts = 0, 0 
+        while total_minutes > 0:
+            next_slot = (current + duration) % (24 * 60)
+            slot_start = current
+            slot_end = next_slot
+
+            has_conflict = any(conflict(slot_start, slot_end, s, e) for s, e in existing_ranges)
+            
+            if has_conflict:
+                conflicts += 1
+            else:
+                slot_start_str = f"{slot_start // 60:02d}:{slot_start % 60:02d}"
+                slot_end_str = f"{slot_end // 60:02d}:{slot_end % 60:02d}"
+                db.execute("INSERT INTO timeslots (user_id, date, time_start, time_end, duration) VALUES (?, ?, ?, ?, ?)",
+                    user_id, date, slot_start_str, slot_end_str, duration
+                           )
+                created += 1
+            total_minutes -= duration
+            current = next_slot
+
+        slots = db.execute("SELECT * FROM timeslots WHERE user_id = ? ORDER BY date, time_start", user_id)
+
+        message = f"{created} slots created."
+
+        if conflicts > 0:
+            message += f"{conflicts} conflicted with existing ones."
+
+        return render_template("availability.html", success=message, slots=slots)
+    
+    # GET requests
+    slots = db.execute("SELECT * FROM timeslots WHERE user_id = ? ORDER BY date, time_start", user_id)
     return render_template("availability.html", slots=slots)
 
 # Route for Form Design ========================================================
@@ -168,22 +254,24 @@ def availability():
 # ------------------------------------------------------------------------------
 @app.route("/book/<username>")
 def book(username):
-    provider = db.execute("SELECT id, email, duration FROM users WHERE username = ?", username)
+    provider = db.execute("SELECT id, email FROM users WHERE username = ?", username)
     if len(provider) == 0:
         return "Provider not found", 404     # Change later
-    return render_template("book.html", username=username, user_id=provider[0]["id"], duration=provider[0]["duration"])
+    return render_template("book.html", username=username, user_id=provider[0]["id"])
 
 # ------------------------------------------------------------------------------
 # ======= API Endpoints for JS Form ============================================
 # ------------------------------------------------------------------------------
 @app.route("/api/services/<int:user_id>")
 def api_services(user_id):
-    services = db.execute("SELECT id, name, price, FROM services WHERE user_id = ?", user_id)
+    # fixed stray comma in SELECT
+    services = db.execute("SELECT id, name, price FROM services WHERE user_id = ?", user_id)
     return jsonify(services)
   
 @app.route("/api/dates/<int:user_id>")
 def api_date(user_id):
-    dates = db.execute("SELECT DISTINCT date FROM timeslots WHERE user_id = ? AND status = 'Free' AND ORDER BY date",
+    # Fix SQL syntax: remove stray AND before ORDER BY
+    dates = db.execute("SELECT DISTINCT date FROM timeslots WHERE user_id = ? AND status = 'Free' ORDER BY date",
                        user_id)
     return jsonify([d['date'] for d in dates])
     
@@ -197,7 +285,7 @@ def api_timeslots(user_id, date):
 def api_book():
     data = request.json
     user_id = data["user_id"]
-    servive_id = data["service_id"]
+    service_id = data["service_id"]
     slot_id = data["slot_id"]
     client_name = data["name"]
     client_email = data["email"]
@@ -212,26 +300,38 @@ def api_book():
         client_id = client[0]["id"]
 
     # Create appointments
-    db.execute("INSER INTO appointments (user_id, client_id, slot_id, service_id) VALUES (?, ?, ?, ?)", user_id, client_id, slot_id, service_id)
+
+    # Insert appointment and mark slot as booked
+    db.execute("INSERT INTO appointments (user_id, client_id, slot_id, service_id) VALUES (?, ?, ?, ?)",
+               user_id, client_id, slot_id, service_id)
     db.execute("UPDATE timeslots SET status = 'Booked' WHERE id = ?", slot_id)
 
+    # Email the provider with basic details (best-effort; non-fatal if mailing fails)
+    try:
+        provider = db.execute("SELECT email FROM users WHERE id = ?", user_id)
+        user_email = provider[0]["email"] if provider else None
 
-    # Email the admin
-    msg = Message(
-            subject=f"Nova marcação de {client}!",
-            recipients=[user_email],
-            body=f"""
-                Novo agendamento recebido:
+        service = db.execute("SELECT name FROM services WHERE id = ?", service_id)
+        service_name = service[0]["name"] if service else "(unknown)"
 
-                Cliente: {client}
-                Serviço: {service}
-                Data: {date} às {time}
+        timeslot = db.execute("SELECT date, time_start, time_end FROM timeslots WHERE id = ?", slot_id)
+        if timeslot:
+            date = timeslot[0]["date"]
+            time = f"{timeslot[0]['time_start']} - {timeslot[0]['time_end']}"
+        else:
+            date = "(unknown)"
+            time = "(unknown)"
 
-                Telefone: {phone}
-                Email: {email}
-                """
-    )
-    mail.send(msg)
+        if user_email:
+            msg = Message(
+                subject=f"New booking from {client_name}",
+                recipients=[user_email],
+                body=f"New booking:\n\nClient: {client_name}\nService: {service_name}\nDate: {date} at {time}\nPhone: {client_phone}\nEmail: {client_email}"
+            )
+            mail.send(msg)
+    except Exception:
+        # Don't crash the API if email sending fails
+        pass
 
     return jsonify({"success": True})
 
