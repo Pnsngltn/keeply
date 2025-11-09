@@ -32,9 +32,22 @@ def after_request(response):
     response.headers['Expires'] = '0'
     return response
 
+@app.route("/logout", methods=["POST"])
+def logout():
+    """Log user out"""
+    # Forget any user_id
+    session.clear()
+    # Redirect user to login form
+    return redirect("/")
+
 # ==============================================================================
 # # Routes
 # ==============================================================================
+
+@app.route("/")
+def index():
+    """Show landing page"""
+    return render_template("index.html")
 
 # ------------------------------------------------------------------------------
 # ============ Register ========================================================

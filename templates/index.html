@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Welcome to Keeply
+{% endblock %}
+
+{% block main %}
+<div class="px-4 py-5 my-5 text-center">
+    <h1 class="display-5 fw-bold text-body-emphasis">Welcome to Keeply</h1>
+    <div class="col-lg-6 mx-auto">
+        <p class="lead mb-4">
+            Simplify your appointment scheduling with Keeply.
+            {% if not session.user_id %}
+                Get started by logging in or registering as a service provider.
+            {% endif %}
+        </p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            {% if not session.user_id %}
+                <a href="/register" class="btn btn-primary btn-lg px-4 gap-3">Register</a>
+                <a href="/login" class="btn btn-outline-secondary btn-lg px-4">Login</a>
+            {% else %}
+                <a href="/dashboard" class="btn btn-primary btn-lg px-4">Go to Dashboard</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
