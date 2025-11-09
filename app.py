@@ -164,11 +164,30 @@ def profile():
 def dashboard():
     user_id = session["user_id"]
     services = db.execute("SELECT * FROM services WHERE user_id = ?", user_id)
-    slots = db.execute("SELECT * FROM timeslots WHERE user_id = ?", user_id)
-    appointments = db.execute("SELECT * FROM appointments WHERE user_id = ?", user_id)
+    
+    # Get appointments with client and service details
+    appointments = db.execute("""
+        SELECT 
+            a.id,
+            a.status,
+            c.name as client_name,
+            c.email as client_email,
+            c.phone as client_phone,
+            s.name as service_name,
+            t.date,
+            t.time_start,
+            t.time_end
+        FROM appointments a
+        JOIN clients c ON a.client_id = c.id
+        JOIN services s ON a.service_id = s.id
+        JOIN timeslots t ON a.slot_id = t.id
+        WHERE a.user_id = ?
+        ORDER BY t.date, t.time_start
+    """, user_id)
 
     return render_template("dashboard.html", 
-                           services=services, slots=slots, appointments=appointments)
+                         services=services,
+                         appointments=appointments)
 
 # ------------------------------------------------------------------------------
 # ========= Availability =======================================================
@@ -281,6 +300,48 @@ def api_timeslots(user_id, date):
                        user_id, date)
     return jsonify(slots)
 
+# ------------------------------------------------------------------------------
+# ======= API Endpoint for Appointment Status Update ==============================
+# ------------------------------------------------------------------------------
+@app.route("/api/appointment/status", methods=["POST"])
+@login_required
+def update_appointment_status():
+    """Update appointment status (confirm, cancel, finish)"""
+    data = request.json
+    if not data or "appointment_id" not in data or "status" not in data:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    appointment_id = data["appointment_id"]
+    new_status = data["status"]
+    user_id = session["user_id"]
+
+    # Verify the appointment belongs to this user
+    appointment = db.execute(
+        "SELECT id FROM appointments WHERE id = ? AND user_id = ?",
+        appointment_id, user_id
+    )
+    if not appointment:
+        return jsonify({"error": "Appointment not found"}), 404
+
+    # Update appointment status
+    db.execute(
+        "UPDATE appointments SET status = ? WHERE id = ?",
+        new_status, appointment_id
+    )
+
+    # If cancelled, free up the timeslot
+    if new_status == "cancelled":
+        slot_id = db.execute(
+            "SELECT slot_id FROM appointments WHERE id = ?",
+            appointment_id
+        )[0]["slot_id"]
+        db.execute(
+            "UPDATE timeslots SET status = 'Free' WHERE id = ?",
+            slot_id
+        )
+
+    return jsonify({"success": True})
+
 @app.route("/api/book", methods=["POST"])
 def api_book():
     data = request.json
@@ -301,9 +362,12 @@ def api_book():
 
     # Create appointments
 
-    # Insert appointment and mark slot as booked
-    db.execute("INSERT INTO appointments (user_id, client_id, slot_id, service_id) VALUES (?, ?, ?, ?)",
-               user_id, client_id, slot_id, service_id)
+    # Insert appointment with pending status and mark slot as booked
+    db.execute("""
+        INSERT INTO appointments 
+        (user_id, client_id, slot_id, service_id, status) 
+        VALUES (?, ?, ?, ?, 'pending')
+    """, user_id, client_id, slot_id, service_id)
     db.execute("UPDATE timeslots SET status = 'Booked' WHERE id = ?", slot_id)
 
     # Email the provider with basic details (best-effort; non-fatal if mailing fails)
