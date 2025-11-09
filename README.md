@@ -46,8 +46,11 @@ keeply/
 │ ├─ layout.html
 │ ├─ login.html
 │ ├─ dashboard.html
+│ ├─ book.html
+│ ├─ header.html
+│ ├─ form.html
 │ ├─ success.html
-│ └─ book.html
+│ └─ failure.html   
 │
 ├─ static/ # Static files
 │ ├─ styles.css

@@ -1,0 +1,140 @@
+{% extends "layout.html" %}
+{% block title %}Book with {{ username }}{% endblock %}
+
+{% block main %}
+<h2>Book with {{ username }}</h2>
+
+<div id="booking-app">
+    <!-- Step 1: Service selection -->
+    <div id="step-service">
+        <h3>Select a Service</h3>
+        <div id="services-container"></div>
+    </div>
+
+    <!-- Step 2: Date selection -->
+    <div id="step-date" style="display:none;">
+        <h3>Select a Date</h3>
+        <div id="dates-container"></div>
+    </div>
+
+    <!-- Step 3: Timeslot selection -->
+    <div id="step-time" style="display:none;">
+        <h3>Select a Timeslot</h3>
+        <div id="slots-container"></div>
+    </div>
+
+    <!-- Step 4: Client info -->
+    <div id="step-client" style="display:none;">
+        <h3>Your Information</h3>
+        <form id="client-form">
+            <input type="text" name="name" placeholder="Name" required><br>
+            <input type="email" name="email" placeholder="Email" required><br>
+            <input type="text" name="phone" placeholder="Phone" required><br>
+            <button type="submit">Book Appointment</button>
+        </form>
+    </div>
+
+    <div id="confirmation" style="display:none;">
+        <h3>Thank you! Your appointment is booked.</h3>
+    </div>
+</div>
+
+<script>
+const userId = {{ user_id }};
+let selectedService = null;
+let selectedDate = null;
+let selectedSlot = null;
+
+// Step 1: Load services
+fetch(`/api/services/${userId}`)
+  .then(res => res.json())
+  .then(services => {
+    const container = document.getElementById("services-container");
+    services.forEach(s => {
+      const btn = document.createElement("button");
+      btn.innerText = `${s.name} - ${s.price}€`;
+      btn.onclick = () => selectService(s.id);
+      container.appendChild(btn);
+    });
+  });
+
+function selectService(serviceId) {
+    selectedService = serviceId;
+    document.getElementById("step-service").style.display = "none";
+    loadDates();
+}
+
+// Step 2: Load dates
+function loadDates() {
+    fetch(`/api/dates/${userId}`)
+      .then(res => res.json())
+      .then(dates => {
+          const container = document.getElementById("dates-container");
+          container.innerHTML = "";
+          dates.forEach(d => {
+              const btn = document.createElement("button");
+              btn.innerText = d;
+              btn.onclick = () => selectDate(d);
+              container.appendChild(btn);
+          });
+          document.getElementById("step-date").style.display = "block";
+      });
+}
+
+function selectDate(date) {
+    selectedDate = date;
+    document.getElementById("step-date").style.display = "none";
+    loadTimeslots();
+}
+
+// Step 3: Load timeslots
+function loadTimeslots() {
+    fetch(`/api/timeslots/${userId}/${selectedDate}`)
+      .then(res => res.json())
+      .then(slots => {
+          const container = document.getElementById("slots-container");
+          container.innerHTML = "";
+          slots.forEach(s => {
+              const btn = document.createElement("button");
+              btn.innerText = `${s.time_start} - ${s.time_end}`;
+              btn.onclick = () => selectSlot(s.id);
+              container.appendChild(btn);
+          });
+          document.getElementById("step-time").style.display = "block";
+      });
+}
+
+function selectSlot(slotId) {
+    selectedSlot = slotId;
+    document.getElementById("step-time").style.display = "none";
+    document.getElementById("step-client").style.display = "block";
+}
+
+// Step 4: Submit client info
+document.getElementById("client-form").onsubmit = function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const data = {
+        user_id: userId,
+        service_id: selectedService,
+        slot_id: selectedSlot,
+        name: formData.get("name"),
+        email: formData.get("email"),
+        phone: formData.get("phone")
+    };
+    fetch("/api/book", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(resp => {
+        if(resp.success){
+            document.getElementById("step-client").style.display = "none";
+            document.getElementById("confirmation").style.display = "block";
+        }
+    });
+}
+</script>
+{% endblock %}
+

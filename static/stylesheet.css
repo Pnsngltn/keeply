@@ -13,3 +13,8 @@
 .dropdown-toggle:not(:focus) {
   outline: 0;
 }
+
+button {
+	margin: 5px;
+	padding: 8px 12px;
+}

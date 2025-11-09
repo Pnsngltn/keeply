@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block title %}
+	Manage
+{% endblock %}
+
+{% block main %}
+<h2>Manage Availability</h2>
+<form method="POST">
+	<label>Date:</label><input type="date" name="date" required><br>
+	<label>Start Time:</label><input type="time" name="time_start" required><br>
+	<button type="submit">Add Slot</button>
+</form>
+
+<h3>Current Slots</h3>
+<ul>
+	{% for slot in slots %}
+	<li>{{ slot.date }}: {{ slot.time_start }} - {{ slot.time_end }} ({{ slot.status }})</li>
+	{% endfor %}
+</ul>
+{% endblock %}
