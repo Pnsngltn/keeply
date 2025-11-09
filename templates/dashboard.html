@@ -1,20 +1,20 @@
 {% extends "layout.html" %}
 
 {% block title %}
-	Dashboard
+    Dashboard
 {% endblock %}
 
 {% block main %}
-	<h2>Dashboard</h2>
+    <h2>Dashboard</h2>
 
-	<h3>Services</h3>
-	<ul>{% for s in services %}<li>{{ s.name }} - {{ s.price }}€</li>{% endfor %}</ul>
+    <h3>Services</h3>
+    <ul>{% for s in services %}<li>{{ s.name }} - {{ s.price }}€</li>{% endfor %}</ul>
 
-	<h3>Availability</h3>
-	<ul>{% for slot in slots %}<li>{{ slot.date }}: {{ slot.time_start }} - {{ slot.time_end }} ({{ slot.status }})</li>{% endfor %}</ul>
+    <h3>Availability</h3>
+    <ul>{% for slot in slots %}<li>{{ slot.date }}: {{ slot.time_start }} - {{ slot.time_end }} ({{ slot.status }})</li>{% endfor %}</ul>
 
-	<h3>Appointments</h3>
-	<ul>{% for a in appointments %}<li>Appointments ID: {{ a.id }}</li>{% endfor %}</ul>
-	<a href="/availability">Manage Availability</a>
+    <h3>Appointments</h3>
+    <ul>{% for a in appointments %}<li>Appointments ID: {{ a.id }}</li>{% endfor %}</ul>
+    <a href="/availability">Manage Availability</a>
 {% endblock %}
 

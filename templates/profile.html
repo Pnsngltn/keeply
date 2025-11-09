@@ -4,57 +4,57 @@
 
 {% block main %}
 <div class="profile-container">
-  <h2>{{ user.username }}'s Profile</h2>
+    <h2>{{ user.username }}'s Profile</h2>
 
-  <h3>User Information</h3>
-  <ul>
-    <li><strong>Username:</strong> {{ user.username }}</li>
-    <li><strong>Email:</strong> {{ user.email }}</li>
-    <li><strong>Phone:</strong> {{ user.phone }}</li>
-  </ul>
+    <h3>User Information</h3>
+    <ul>
+        <li><strong>Username:</strong> {{ user.username }}</li>
+        <li><strong>Email:</strong> {{ user.email }}</li>
+        <li><strong>Phone:</strong> {{ user.phone }}</li>
+    </ul>
 
-  {% if error %}
-    <p style="color:red;">{{ error }}</p>
-  {% endif %}
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
 
-  <h3 class="mt-4">Your Services</h3>
-  <table border="1" cellpadding="6">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Description</th>
-        <th>Price</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for service in services %}
-        <tr>
-          <td>{{ service.name }}</td>
-          <td>{{ service.description }}</td>
-          <td>{{ service.price }}</td>
-        </tr>
-      {% else %}
-        <tr><td colspan="3">No services added yet.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+    <h3 class="mt-4">Your Services</h3>
+    <table border="1" cellpadding="6">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for service in services %}
+                <tr>
+                    <td>{{ service.name }}</td>
+                    <td>{{ service.description }}</td>
+                    <td>{{ service.price }}</td>
+                </tr>
+            {% else %}
+                <tr><td colspan="3">No services added yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-  <h3 class="mt-4">Add a New Service</h3>
-  <form method="POST">
-    <div>
-      <label for="name">Service Name:</label><br>
-      <input type="text" name="name" required>
-    </div>
-    <div class="mt-2">
-      <label for="description">Description:</label><br>
-      <textarea name="description"></textarea>
-    </div>
-    <div class="mt-2">
-      <label for="price">Price:</label><br>
-      <input type="number" name="price" required>
-    </div>
-    <button class="mt-2" type="submit">Add Service</button>
-  </form>
+    <h3 class="mt-4">Add a New Service</h3>
+    <form method="POST">
+        <div>
+            <label for="name">Service Name:</label><br>
+            <input type="text" name="name" required>
+        </div>
+        <div class="mt-2">
+            <label for="description">Description:</label><br>
+            <textarea name="description"></textarea>
+        </div>
+        <div class="mt-2">
+            <label for="price">Price:</label><br>
+            <input type="number" name="price" required>
+        </div>
+        <button class="mt-2" type="submit">Add Service</button>
+    </form>
 </div>
 {% endblock %}
 

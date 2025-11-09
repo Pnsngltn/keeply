@@ -5,7 +5,7 @@
 
 {% block main %}
 <div class="availability-container">
-    <h2>Manage Availability</h2>
+	<h2>Manage Availability</h2>
 	<form method="POST" id="availability-form">
 		<div>
 			<label>Date:</label><br>
@@ -27,12 +27,12 @@
 				<option value="">Select valid duration</option>
 			</select>
 		</div>
-	
+
 		<h4 class="mt-4">Preview of Generated Slots</h4>
-  		<table id="preview-table" border="1" cellpadding="6">
+		<table id="preview-table" border="1" cellpadding="6">
 			<thead><tr><th>#</th><th>Start</th><th>End</th></tr></thead>
 			<tbody></tbody>
-  		</table>
+		</table>
 
 		<button class="mt-4" type="submit">Add Timeslot</button>
 	</form>
@@ -45,26 +45,26 @@
 	<table border="1" cellpadding="6">
 		<thead>
 			<tr>
-      			<th>Date</th>
-      			<th>Start</th>
-    			<th>End</th>
-  				<th>Duration</th>
-                <th>Status</th>
-    		</tr>
-  		</thead>
-  		<tbody>
-    		{% for slot in slots %}
-      			<tr>
-    				<td>{{ slot.date }}</td>
-    				<td>{{ slot.time_start }}</td>
-        			<td>{{ slot.time_end }}</td>
-        			<td>{{ slot.duration }} min</td>
-        			<td>{{ slot.status }}</td>
-      			</tr>
-    		{% else %}
-  				<tr><td colspan="5">No timeslots yet</td></tr>
-    		{% endfor %}
-  		</tbody>
+				<th>Date</th>
+				<th>Start</th>
+				<th>End</th>
+				<th>Duration</th>
+				<th>Status</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for slot in slots %}
+				<tr>
+					<td>{{ slot.date }}</td>
+					<td>{{ slot.time_start }}</td>
+					<td>{{ slot.time_end }}</td>
+					<td>{{ slot.duration }} min</td>
+					<td>{{ slot.status }}</td>
+				</tr>
+			{% else %}
+				<tr><td colspan="5">No timeslots yet</td></tr>
+			{% endfor %}
+		</tbody>
 	</table>
 </div>
 

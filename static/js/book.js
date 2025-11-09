@@ -1,4 +1,6 @@
-const userId = {{ user_id }};
+const bookingApp = document.getElementById('booking-app');
+const userId = bookingApp ? bookingApp.dataset.userId : null;
+if (!userId) console.error('Booking app: user_id not found (check template)');
 let selectedService = null;
 let selectedDate = null;
 let selectedSlot = null;

@@ -4,7 +4,7 @@
 {% block main %}
 <h2>Book with {{ username }}</h2>
 
-<div id="booking-app">
+<div id="booking-app" data-user-id="{{ user_id }}">
     <!-- Step 1: Service selection -->
     <div id="step-service">
         <h3>Select a Service</h3>
@@ -40,7 +40,7 @@
 </div>
 
 <!-- Link JS file -->
-<script src="{{ url_for('static', filename="js/book.js') }}"></script>
+<script src="{{ url_for('static', filename='js/book.js') }}"></script>
 
 {% endblock %}
 
