@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block title %}Book with {{ username }}{% endblock %}
+
+{% block main %}
+<h2>Book with {{ username }}</h2>
+
+<div id="booking-app" data-user-id="{{ user_id }}">
+    <!-- Step 1: Service selection -->
+    <div id="step-service">
+        <h3>Select a Service</h3>
+        <div id="services-container"></div>
+    </div>
+
+    <!-- Step 2: Date selection -->
+    <div id="step-date" style="display:none;">
+        <h3>Select a Date</h3>
+        <div id="dates-container"></div>
+    </div>
+
+    <!-- Step 3: Timeslot selection -->
+    <div id="step-time" style="display:none;">
+        <h3>Select a Timeslot</h3>
+        <div id="slots-container"></div>
+    </div>
+
+    <!-- Step 4: Client info -->
+    <div id="step-client" style="display:none;">
+        <h3>Your Information</h3>
+        <form id="client-form">
+            <input type="text" name="name" placeholder="Name" required><br>
+            <input type="email" name="email" placeholder="Email" required><br>
+            <input type="text" name="phone" placeholder="Phone" required><br>
+            <button type="submit">Book Appointment</button>
+        </form>
+    </div>
+
+    <div id="confirmation" style="display:none;">
+        <h3>Thank you! Your appointment is booked.</h3>
+    </div>
+</div>
+
+<!-- Link JS file -->
+<script src="{{ url_for('static', filename='js/book.js') }}"></script>
+
+{% endblock %}
+

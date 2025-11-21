@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+{% block title %}
+    Manage
+{% endblock %}
+
+{% block main %}
+<div class="availability-container container">
+	<h2 class="mb-4">Manage Availability</h2>
+
+	<form method="POST" id="availability-form" class="row g-3">
+		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+		<div class="col-12 col-md-3">
+			<label class="form-label">Date</label>
+			<input class="form-control" type="date" name="date" required>
+		</div>
+
+		<div class="col-6 col-md-3">
+			<label class="form-label">Start Time</label>
+			<input class="form-control" type="time" id="time_start" name="time_start" required>
+		</div>
+
+		<div class="col-6 col-md-3">
+			<label class="form-label">End Time</label>
+			<input class="form-control" type="time" id="time_end" name="time_end" required>
+		</div>
+
+		<div class="col-12 col-md-3">
+			<label class="form-label">Duration (minutes)</label>
+			<select id="duration" name="duration" class="form-select" disabled required>
+				<option value="">Select valid duration</option>
+			</select>
+		</div>
+
+		<div class="col-12">
+			<p class="mt-2"><strong>Period:</strong> <span id="period-display">-</span></p>
+		</div>
+
+		<div class="col-12">
+			<h4 class="mt-3">Preview of Generated Slots</h4>
+			<div class="table-responsive table-container">
+				<table id="preview-table" class="table table-sm preview-table mb-0 w-100">
+					<thead class="table-light"><tr><th>#</th><th>Start</th><th>End</th></tr></thead>
+					<tbody></tbody>
+				</table>
+			</div>
+		</div>
+
+		<div class="col-12">
+			<button class="btn btn-primary mt-3" type="submit">Add Timeslot</button>
+		</div>
+	</form>
+
+	{% if success %}
+		<div class="alert alert-success mt-3">{{ success }}</div>
+	{% endif %}
+
+	<h3 class="mt-4">Your Existing Timeslots</h3>
+		<div class="d-flex justify-content-between align-items-center mb-2">
+			<div>
+				<button id="delete-selected-btn" class="btn btn-danger btn-sm">Delete selected</button>
+			</div>
+			<div>
+				<small class="text-muted">Select rows and click Delete selected</small>
+			</div>
+		</div>
+
+		<div class="table-responsive table-container">
+			<table class="table table-striped table-hover mb-0">
+				<thead class="table-light">
+					<tr>
+						<th style="width:40px"><input id="select-all-slots" type="checkbox"/></th>
+						<th>Date</th>
+						<th>Start</th>
+						<th>End</th>
+						<th>Duration</th>
+						<th>Status</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for slot in slots %}
+					<tr>
+						<td><input class="slot-checkbox" type="checkbox" value="{{ slot.id }}"/></td>
+						<td>{{ slot.date }}</td>
+						<td>{{ slot.time_start }}</td>
+						<td>{{ slot.time_end }}</td>
+						<td>{{ slot.duration }} min</td>
+						<td>{{ slot.status }}</td>
+					</tr>
+					{% else %}
+					<tr><td colspan="6">No timeslots yet</td></tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+
+		<script>
+			document.addEventListener('DOMContentLoaded', function () {
+				const deleteBtn = document.getElementById('delete-selected-btn');
+				const selectAll = document.getElementById('select-all-slots');
+
+				selectAll && selectAll.addEventListener('change', function (e) {
+					document.querySelectorAll('.slot-checkbox').forEach(cb => cb.checked = e.target.checked);
+				});
+
+				deleteBtn && deleteBtn.addEventListener('click', async function () {
+					const checks = Array.from(document.querySelectorAll('.slot-checkbox:checked'));
+					if (checks.length === 0) { alert('No timeslots selected'); return; }
+					if (!confirm(`Delete ${checks.length} timeslot(s)? This cannot be undone.`)) return;
+					const ids = checks.map(c => c.value);
+
+					try {
+						const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+						const CSRF_TOKEN = csrfMeta ? csrfMeta.getAttribute('content') : null;
+						const res = await fetch('/api/timeslots/delete', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+								...(CSRF_TOKEN ? {'X-CSRFToken': CSRF_TOKEN} : {})
+							},
+							credentials: 'same-origin',
+							body: JSON.stringify({ slot_ids: ids })
+						});
+						const json = await res.json();
+						if (!res.ok) {
+							alert(json.error || 'Failed to delete timeslots');
+							return;
+						}
+						// reload to reflect changes
+						window.location.reload();
+					} catch (err) {
+						console.error(err);
+						alert('Error deleting timeslots');
+					}
+				});
+			});
+		</script>
+</div>
+
+<!-- Link JS file -->
+<script src="{{ url_for('static', filename='js/helpers.js') }}"></script>
+
+{% endblock %}
