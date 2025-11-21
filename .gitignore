@@ -1,0 +1,23 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment
+keeply-venv/
+
+# Gunicorn socket
+keeply.sock
+
+# Database
+*.db
+
+# Logs
+ *.log
+
+# OS files
+.DS_Store
+
+# Flask session
+flask_session/
