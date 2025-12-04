@@ -288,7 +288,7 @@ def availability():
         existing_ranges = []
         for row in existing:
             sh, sm = map(int, row["time_start"].split(":"))
-            eh, em = map(int, row["time_send"].split(":"))
+            eh, em = map(int, row["time_end"].split(":"))
             existing_ranges.append((sh * 60 + sm, eh * 60 + em))
 
         # Generate slots and check conflicts
@@ -514,4 +514,4 @@ def api_book():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=8000, debug=True)

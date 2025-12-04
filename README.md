@@ -63,6 +63,7 @@ keeply/
 
 ## Installation / Setup
 
+### Local Setup
 ```bash
 # Clone repo
 git clone https://github.com/Pnsngltn/keeply.git
@@ -78,4 +79,16 @@ pip install -r requirements.txt
 
 # Run Flask app
 flask run
+```
+
+### Docker Setup
+```bash
+# Build and run with Docker Compose
+docker-compose up --build
+
+# Access at http://localhost:8000
+```
+
+Ensure `.env` file is present with required environment variables (e.g., email credentials).
+
 

@@ -6,18 +6,49 @@ __pycache__/
 
 # Virtual Environment
 keeply-venv/
+venv/
+env/
 
 # Gunicorn socket
 keeply.sock
+*.sock
 
 # Database
 *.db
+books.db
 
 # Logs
- *.log
+*.log
+logs/
 
 # OS files
 .DS_Store
+Thumbs.db
 
 # Flask session
 flask_session/
+instance/
+
+# Docker
+.dockerignore
+
+# Environment files (keep .env but ignore others)
+.env.local
+.env.development
+.env.production
+!.env
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Cloudflare tunnel files
+tunnel-*.json
+cloudflared/
+
+# Backup files
+*.bak
+*.backup
+*~
