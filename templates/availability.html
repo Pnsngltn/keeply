@@ -7,7 +7,9 @@
 <div class="availability-container container">
 	<h2 class="mb-4">Manage Availability</h2>
 
+    {% if has_services %}
 	<form method="POST" id="availability-form" class="row g-3">
+        <!-- Form if services exist -->
 		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 		<div class="col-12 col-md-3">
 			<label class="form-label">Date</label>
@@ -49,11 +51,23 @@
 			<button class="btn btn-primary mt-3" type="submit">Add Timeslot</button>
 		</div>
 	</form>
+    {% else %}
+        <div class="alert alert-warning">
+        <h4>No Services Found</h4>
+        <p>You need to create services before you can set up availability time slots.</p>
+        <a href="/profile" class="btn btn-primary">Create Services</a>
+    </div>
+    {% endif %}
 
 	{% if success %}
 		<div class="alert alert-success mt-3">{{ success }}</div>
 	{% endif %}
 
+    {% if error %}
+        <div class="alert alert-danger mt-3">{{ error|safe }}</div>
+    {% endif %}
+
+    {% if has_services %}
 	<h3 class="mt-4">Your Existing Timeslots</h3>
 		<div class="d-flex justify-content-between align-items-center mb-2">
 			<div>
@@ -92,6 +106,11 @@
 				</tbody>
 			</table>
 		</div>
+        {% else %}
+        <div class="alert alert-info mt-4">
+            <p>Create services first to start managing your availability.</p>
+        </div>
+        {% endif %}
 
 		<script>
 			document.addEventListener('DOMContentLoaded', function () {

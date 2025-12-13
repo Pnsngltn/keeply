@@ -12,11 +12,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from helper import login_required, conflict
 
-# Configure application
-app = Flask(__name__)
+# -----------------------------------------------------------------------------
+# App Configuration    ::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+# -----------------------------------------------------------------------------
 
-# Load environment variables from .env for local development
-load_dotenv()
+app = Flask(__name__) # Configure application
+
+load_dotenv() # Load environment variables from .env for local development
 
 # Configure CSRF protection
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
@@ -27,10 +29,16 @@ app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_PERMANENT"] = False
 Session(app)
 
-# Configure CS50's SQL Library
+# -----------------------------------------------------------------------------
+# Configure CS50's SQL Library    :::::::::::::::::::::::::::::::::::::::::::::
+# -----------------------------------------------------------------------------
+
 db = SQL("sqlite:///books.db")
 
-# Configure Flask-Mail from environment (do NOT hardcode secrets)
+# -----------------------------------------------------------------------------
+# Configure Flask-Mail    :::::::::::::::::::::::::::::::::::::::::::::::::::::
+# -----------------------------------------------------------------------------
+
 # Use environment variables in production or a .env file for local development.
 app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER", "smtp.gmail.com")
 app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT", 587))
@@ -40,18 +48,35 @@ app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
 app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
 app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER", app.config.get("MAIL_USERNAME"))
 
-# Initialize Mail extension
-mail = Mail(app)
+mail = Mail(app) # Initialize Mail extension
 
+# Prevent Cached Information
+@app.after_request
+def after_request(response):
+    """Ensure Inputs aren't cached"""
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
+# ----------------------------------------------------------------------------
+# Asynchronous Email Delivery   ::::::::::::::::::::::::::::::::::::::::::::::
+# ----------------------------------------------------------------------------
+
+# WARNING: THREAD HUNGRY 
+# Each email needs a new thread - Not Scalable
+# A thread queue could resolve this
 
 def _send_async_mail(app, msg):
-    """Send email inside app context from a background thread."""
+    """
+    Send email inside app context from a background thread.
+    """
     with app.app_context():
         mail.send(msg)
 
-
 def send_email(subject, recipients, body, html=None):
-    """Send an email asynchronously. Returns True if send was queued.
+    """
+    Send an email asynchronously. Returns True if send was queued.
 
     recipients may be a string or a list.
     This helper silently returns False when credentials are not configured.
@@ -68,26 +93,13 @@ def send_email(subject, recipients, body, html=None):
     thr.start()
     return True
 
-# Clear Cached Information
-@app.after_request
-def after_request(response):
-    """Ensure Inputs aren't cached"""
-    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
-    return response
-
-@app.route("/logout", methods=["POST"])
-def logout():
-    """Log user out"""
-    # Forget any user_id
-    session.clear()
-    # Redirect user to login form
-    return redirect("/")
-
 # ==============================================================================
-# # Routes
+# >>> >>> >>> >>> >>> >>> >>> >>> >>> ROUTES <<< <<< <<< <<< <<< <<< <<< <<< <<<
 # ==============================================================================
+
+# ------------------------------------------------------------------------------
+# =========== Landing Page =====================================================
+# ------------------------------------------------------------------------------
 
 @app.route("/")
 def index():
@@ -115,7 +127,7 @@ def register():
 
         if password != confirmation:
             return render_template("register.html", error="Passwords do not match")
-        
+
         # Check if username or email already exist
         if db.execute("SELECT * FROM users WHERE username = ?", username):
             return render_template("register.html", error="Username already taken")
@@ -170,13 +182,23 @@ def login():
                 ):
             return render_template("login.html", error="Invalid username or password")
 
-        # Remember Logged-In User
-        session["user_id"] = rows[0]["id"]
+        session["user_id"] = rows[0]["id"] # Remember Logged-In User
 
-        # Redirect to dashboard
-        return redirect("/dashboard")
+        return redirect("/dashboard") # Redirect to dashboard
     else:
         return render_template("login.html")
+
+# ------------------------------------------------------------------------------
+# =========== Logout ===========================================================
+# ------------------------------------------------------------------------------
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    """Log user out"""
+    # Forget any user_id
+    session.clear()
+    # Redirect user to login form
+    return redirect("/")
 
 # ------------------------------------------------------------------------------
 # ========== Profile ===========================================================
@@ -208,7 +230,7 @@ def profile():
             user_id, name, description, price
         )
         return redirect("/profile")
-    
+
     # GET request: Show Profile
     services = db.execute("SELECT id, name, description, price FROM services WHERE user_id = ?", user_id)
 
@@ -223,8 +245,9 @@ def profile():
 def dashboard():
     user_id = session["user_id"]
     services = db.execute("SELECT * FROM services WHERE user_id = ?", user_id)
-    
+
     # Get appointments with client and service details
+    # .. I had help from Copilot to make this query more efficient ..
     appointments = db.execute("""
         SELECT 
             a.id,
@@ -255,11 +278,26 @@ def dashboard():
 @app.route("/availability", methods=["GET", "POST"])
 @login_required
 def availability():
-    """Set the available timeslots"""
+    """
+    Set the available timeslots
+    
+    I'm having issues with the logic for how to store and acess timeslots
+    The logic i use below was mostly given to me by Copilot
+    Unclear - Overcomplicated (hopefully)
+    """
 
     user_id = session["user_id"]
-    
+
     if request.method == "POST":
+        # Check if user has any services already
+        services = db.execute("SELECT COUNT(*) as count FROM services WHERE user_id = ?", user_id)
+        if services[0]["count"] == 0:
+            return render_template(
+                    "availability.html",
+                    error="You must add services before setting up availability. <a href='/profile'> Create Services Here</a>",
+                    slots=[], 
+                    has_services=False
+            )
         date = request.form.get("date")
         start = request.form.get("time_start")
         end = request.form.get("time_end")
@@ -269,7 +307,8 @@ def availability():
             return render_template(
                 "availability.html",
                 error="Please fill all fields",
-                    slots=db.execute("SELECT * FROM timeslots where user_id = ? ORDER BY date, time_start", user_id)
+                slots=db.execute("SELECT * FROM timeslots where user_id = ? ORDER BY date, time_start", user_id),
+                has_services=True
             )
         duration = int(duration)
 
@@ -300,7 +339,7 @@ def availability():
             slot_end = next_slot
 
             has_conflict = any(conflict(slot_start, slot_end, s, e) for s, e in existing_ranges)
-            
+
             if has_conflict:
                 conflicts += 1
             else:
@@ -320,11 +359,18 @@ def availability():
         if conflicts > 0:
             message += f"{conflicts} conflicted with existing ones."
 
-        return render_template("availability.html", success=message, slots=slots)
-    
+        return render_template("availability.html", success=message, slots=slots, has_services=True)
+
     # GET requests
-    slots = db.execute("SELECT * FROM timeslots WHERE user_id = ? ORDER BY date, time_start", user_id)
-    return render_template("availability.html", slots=slots)
+    services = db.execute("SELECT COUNT(*) as count FROM services WHERE user_id = ?", user_id)
+    has_services = services[0]["count"] > 0
+
+    if has_services:
+        slots = db.execute("SELECT * FROM timeslots WHERE user_id = ? ORDER BY date, time_start", user_id)
+    else:
+        slots = [] 
+
+    return render_template("availability.html", slots=slots, has_services=has_services)
 
 # ------------------------------------------------------------------------------
 # ========= /username (Booking Page) ===========================================
@@ -337,23 +383,23 @@ def book(username):
         return "Provider not found", 404     # Change later
     return render_template("book.html", username=username, user_id=provider[0]["id"])
 
-# ------------------------------------------------------------------------------
-# ======= API Endpoints for JS Form ============================================
-# ------------------------------------------------------------------------------
+# ==============================================================================
+# ::::::: API Endpoints for JS Form ::::::::::::::::::::::::::::::::::::::::::::
+# ==============================================================================
 
 @app.route("/api/services/<int:user_id>")
 def api_services(user_id):
     # fixed stray comma in SELECT
     services = db.execute("SELECT id, name, price FROM services WHERE user_id = ?", user_id)
     return jsonify(services)
-  
+
 @app.route("/api/dates/<int:user_id>")
 def api_date(user_id):
     # Fix SQL syntax: remove stray AND before ORDER BY
     dates = db.execute("SELECT DISTINCT date FROM timeslots WHERE user_id = ? AND status = 'Free' ORDER BY date",
                        user_id)
     return jsonify([d['date'] for d in dates])
-    
+
 @app.route("/api/timeslots/<int:user_id>/<date>")
 def api_timeslots(user_id, date):
     slots = db.execute("SELECT id, time_start, time_end FROM timeslots WHERE user_id = ? AND status = 'Free' AND date = ? ORDER BY time_start", 
@@ -361,7 +407,7 @@ def api_timeslots(user_id, date):
     return jsonify(slots)
 
 # ------------------------------------------------------------------------------
-# ======= API Endpoint for Appointment Status Update ==============================
+# ======= API Endpoint for Appointment Status Update ===========================
 # ------------------------------------------------------------------------------
 
 @app.route("/api/appointment/status", methods=["POST"])
@@ -403,6 +449,9 @@ def update_appointment_status():
 
     return jsonify({"success": True})
 
+# ------------------------------------------------------------------------------
+# ======= API Endpoints for Timeslot Managment =================================
+# ------------------------------------------------------------------------------
 
 @app.route("/api/timeslots/delete", methods=["POST"])
 @login_required
@@ -454,6 +503,10 @@ def delete_timeslots():
         db.execute(f"DELETE FROM timeslots WHERE id IN ({ph})", *deletable)
 
     return jsonify({"deleted": deletable, "not_deleted": not_deleted})
+
+# ------------------------------------------------------------------------------
+# ======= API Endpoints for Booking ============================================
+# ------------------------------------------------------------------------------
 
 @app.route("/api/book", methods=["POST"])
 def api_book():
@@ -508,6 +561,7 @@ def api_book():
             )
     except Exception:
         # Don't crash the API if email sending fails
+        # TODO: Handle exceptions (Maybe a pop-up error message?)
         pass
 
     return jsonify({"success": True})
