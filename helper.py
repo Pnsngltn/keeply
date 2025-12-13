@@ -1,6 +1,7 @@
 from flask import redirect, render_template, session
 from functools import wraps
 
+# Wrapper function for login-required routes
 def login_required(f):
     """
         Decorate routes to require login
@@ -12,6 +13,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# Function to detect conflicts in timeslots
 def conflict(s1, e1, s2, e2):
     return not (e1 <= s2 or s1 >= e2)
 

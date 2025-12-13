@@ -1,11 +1,7 @@
 # Keeply
 #### Video Demo: <>
 
-[![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)](https://www.python.org/)
-[![Flask](https://img.shields.io/badge/Flask-2.3-orange?logo=flask)](https://flask.palletsprojects.com/)
-[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-
-## Project Overview
+## Description
 
 **Keeply** is a comprehensive web-based appointment booking system built with Flask that enables service providers to manage their schedules and allows clients to book appointments directly through personalized booking pages.
 
@@ -22,12 +18,6 @@ The project evolved into a multi-tenant SaaS-style application where:
 ### Current Deployment
 
 The application is currently running on Ubuntu Server via Docker containers, hosted on a custom domain (keeply.bitwerk.dev). This setup provides a real-world production environment for testing and development while maintaining scalability for future growth.
-
----
-
-## Demo
-![Keeply Dashboard Placeholder](screenshots/dashboard.png)
-*Placeholder screenshot: Dashboard showing appointments and availability.*
 
 ---
 
@@ -65,12 +55,11 @@ The application is currently running on Ubuntu Server via Docker containers, hos
 - **CSRF Protection**: Cross-Site Request Forgery protection on all forms and API endpoints
 - **Password Security**: Werkzeug-based password hashing with salt
 - **Session Management**: Secure filesystem-based sessions with automatic expiration
-- **SQL Injection Prevention**: Parameterized queries throughout the application
+- **SQL Injection Prevention**: Easy parameterized queries throughout the application with CS50's SQL library
 
 ### Communication System
 - **Email Notifications**: Asynchronous email sending for new appointments
 - **Provider Alerts**: Automatic email notifications when clients book appointments
-- **Best-Effort Delivery**: Non-blocking email system that doesn't affect user experience
 
 ---
 
@@ -145,10 +134,7 @@ keeply/
 │    └─ dashboard.js      # Dashboard functionality and status updates
 │
 ├─ Documentation
-│ ├─ README.md            # This comprehensive project documentation
-│ ├─ CODE_DOCUMENTATION.md # Detailed code explanation and architecture guide
-│ └─ CODE_DOCUMENTATION.txt # Plain text version of code documentation
-│
+│ └─ README.md            # This File
 └─ Data
    └─ books.db            # SQLite database file (created from schema.sql)
 ```
@@ -158,7 +144,7 @@ keeply/
 
 ### Core Application Files
 
-#### `app.py` - Main Flask Application (526 lines)
+#### `app.py` - Main Flask Application
 This is the heart of the Keeply application containing all HTTP routes, API endpoints, and business logic.
 
 **Key Components:**
@@ -166,8 +152,8 @@ This is the heart of the Keeply application containing all HTTP routes, API endp
 - **Authentication Routes**: Complete user registration, login, logout system with secure password handling
 - **User Management**: Profile management and service creation functionality
 - **Dashboard System**: Comprehensive appointment management with status tracking
-- **Availability Management**: Time slot generation with mathematical conflict detection and validation
-- **Booking API**: RESTful endpoints for client-facing booking process
+- **Availability Management**: Time slot generation with conflict detection and validation
+- **Booking API**: RESTful endpoints for client-side booking process
 - **Email System**: Asynchronous email sending with background threading for provider notifications
 - **Security Implementation**: CSRF protection, SQL injection prevention, and session security
 
@@ -177,7 +163,7 @@ This is the heart of the Keeply application containing all HTTP routes, API endp
 - Handles both HTML form submissions and JSON API requests
 - Includes comprehensive error handling and user feedback
 
-#### `helper.py` - Utility Functions (19 lines)
+#### `helper.py` - Utility Functions
 Contains reusable helper functions that support the main application logic.
 
 **Functions:**
@@ -190,7 +176,7 @@ Contains reusable helper functions that support the main application logic.
   - Returns True if ranges overlap, False if they don't
   - Used in availability management to prevent double-booking
 
-#### `wsgi.py` - Production Server Entry Point (5 lines)
+#### `wsgi.py` - Production Server Entry Point
 WSGI (Web Server Gateway Interface) configuration for production deployment.
 
 **Purpose:**
@@ -199,7 +185,7 @@ WSGI (Web Server Gateway Interface) configuration for production deployment.
 - Enables deployment behind reverse proxies (nginx, Apache)
 - Standard Python WSGI pattern for scalable deployments
 
-#### `schema.sql` - Database Schema Definition (60 lines)
+#### `schema.sql` - Database Schema Definition
 Complete SQLite database structure with normalized relational design.
 
 **Tables:**
@@ -216,7 +202,7 @@ Complete SQLite database structure with normalized relational design.
 
 ### Configuration & Deployment Files
 
-#### `requirements.txt` - Python Dependencies (18 lines)
+#### `requirements.txt` - Python Dependencies
 Defines all required Python packages with exact version pinning for reproducible deployments.
 
 **Key Dependencies:**
@@ -238,7 +224,7 @@ Configuration file for sensitive data and deployment settings (not in version co
 - **Mail Configuration**: SMTP settings for email notifications
 - **Database Settings**: Connection parameters and security options
 
-#### `Dockerfile` - Container Configuration (12 lines)
+#### `Dockerfile` - Container Configuration
 Docker container definition for consistent deployment environments.
 
 **Features:**
@@ -247,7 +233,7 @@ Docker container definition for consistent deployment environments.
 - Gunicorn production server configuration
 - Security best practices with non-root execution
 
-#### `docker-compose.yml` - Multi-Service Orchestration (28 lines)
+#### `docker-compose.yml` - Multi-Service Orchestration
 Defines complete application stack with external access via Cloudflare tunnel.
 
 **Services:**
@@ -257,7 +243,7 @@ Defines complete application stack with external access via Cloudflare tunnel.
 
 ### Frontend Templates
 
-#### `templates/layout.html` - Base Template (32 lines)
+#### `templates/layout.html` - Base Template
 Foundation template providing consistent HTML structure across all pages.
 
 **Components:**
@@ -354,7 +340,7 @@ Simple confirmation page displayed after successful appointment booking.
 
 ### Client-Side JavaScript
 
-#### `static/js/helpers.js` - Availability Form Enhancement (108 lines)
+#### `static/js/helpers.js` - Availability Form Enhancement
 Provides interactive functionality for the time slot creation form.
 
 **Key Functions:**
@@ -369,7 +355,7 @@ Provides interactive functionality for the time slot creation form.
 - **Smart Defaults**: Intelligent duration suggestions based on time range
 - **Error Prevention**: Blocks invalid selections before form submission
 
-#### `static/js/book.js` - Booking Wizard Controller (108 lines)
+#### `static/js/book.js` - Booking Wizard Controller
 Manages the complete client booking process with API integration.
 
 **Process Management:**
@@ -400,224 +386,3 @@ Custom CSS providing application-specific styling beyond Bootstrap defaults.
 - **Professional Appearance**: Business-appropriate color scheme and typography
 - **Accessibility**: Proper contrast ratios and keyboard navigation
 - **Brand Consistency**: Unified visual language across all pages
-
-## Installation & Setup Guide
-
-### Prerequisites
-- **Python 3.11+**: Required for modern syntax and type hints
-- **Git**: For version control and repository cloning
-- **Docker & Docker Compose**: For containerized deployment (optional)
-- **Text Editor/IDE**: For code development and modification
-
-### Local Development Setup
-
-#### Step 1: Repository Setup
-```bash
-# Clone the repository
-git clone https://github.com/Pnsngltn/keeply.git
-cd keeply
-
-# Verify repository structure
-ls -la  # Should show app.py, templates/, static/, etc.
-```
-
-#### Step 2: Python Virtual Environment
-```bash
-# Create virtual environment
-python3 -m venv venv
-
-# Activate environment (Mac/Linux)
-source venv/bin/activate
-
-# Activate environment (Windows)
-venv\Scripts\activate
-
-# Verify activation (should show (venv) in prompt)
-which python
-```
-
-#### Step 2.5: Python 3.12+ Compatibility Fix
-```bash
-# IMPORTANT: If using Python 3.12+, install setuptools first
-# This fixes CS50 library compatibility with newer Python versions
-pip install setuptools
-
-# Verify setuptools installation
-python -c "import setuptools; print('setuptools OK')"
-```
-
-#### Step 3: Dependency Installation
-```bash
-# Install required packages with exact versions
-pip install -r requirements.txt
-
-# Verify installation
-pip list  # Should show Flask, CS50, etc.
-
-# IMPORTANT: If using Python 3.12+, install setuptools first
-# This fixes CS50 library compatibility with newer Python versions
-pip install setuptools
-```
-
-#### Step 4: Environment Configuration
-```bash
-# Create environment file (if not exists)
-touch .env
-
-# Edit .env file with required variables
-nano .env  # or use your preferred editor
-```
-
-**Required Environment Variables:**
-```bash
-# Flask Configuration
-SECRET_KEY=your-secret-key-here-generate-random-string
-
-# Email Configuration (for appointment notifications)
-MAIL_SERVER=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USE_TLS=True
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-specific-password
-MAIL_DEFAULT_SENDER=your-email@gmail.com
-```
-
-#### Step 5: Database Initialization
-```bash
-# Initialize SQLite database from schema
-sqlite3 books.db < schema.sql
-
-# Verify database creation
-ls -la books.db  # Should show database file
-sqlite3 books.db ".tables"  # Should show all tables
-```
-
-#### Step 6: Run Development Server
-```bash
-# Start Flask development server
-flask run
-
-# Alternative: Run with Python directly
-python app.py
-
-# Application will be available at:
-# http://localhost:5000
-```
-
-### Docker Production Setup
-
-#### Step 1: Environment Preparation
-```bash
-# Ensure Docker is installed
-docker --version
-docker-compose --version
-
-# Clone repository (if not done)
-git clone https://github.com/Pnsngltn/keeply.git
-cd keeply
-```
-
-#### Step 2: Environment Configuration
-```bash
-# Create production environment file
-cp .env.example .env  # if example exists
-# Edit .env with production values
-```
-
-#### Step 3: Container Deployment
-```bash
-# Build and start all services
-docker-compose up --build
-
-# Run in background (detached mode)
-docker-compose up --build -d
-
-# View logs
-docker-compose logs -f app
-```
-
-#### Step 4: Access Verification
-```bash
-# Check if services are running
-docker-compose ps
-
-# Test application locally
-curl http://localhost:8000
-
-# Access via browser
-# http://localhost:8000
-```
-
-### Production Deployment Considerations
-
-#### Security Configuration
-- **SECRET_KEY**: Use strong, randomly generated string (32+ characters)
-- **Database**: Regular backups of books.db file
-- **Email**: Use app-specific passwords, not main account passwords
-- **HTTPS**: Configure reverse proxy with SSL/TLS termination
-
-#### Performance Optimization
-- **Gunicorn**: Production WSGI server (configured in docker-compose.yml)
-- **Worker Processes**: Multiple Gunicorn workers for concurrency
-- **Database Indexing**: Ensure proper indexes on frequently queried columns
-- **Static Files**: Serve via CDN or reverse proxy in production
-
-#### Monitoring & Maintenance
-- **Application Logs**: Monitor docker-compose logs for errors
-- **Resource Usage**: Monitor CPU, memory, and disk usage
-- **Regular Updates**: Keep dependencies updated for security
-- **Backup Strategy**: Automated database backups and version control
-
-### Troubleshooting Common Issues
-
-#### Database Connection Problems
-```bash
-# Check if database file exists
-ls -la books.db
-
-# Verify database permissions
-sqlite3 books.db ".schema"
-
-# Recreate database if corrupted
-rm books.db
-sqlite3 books.db < schema.sql
-```
-
-#### Environment Variable Issues
-```bash
-# Check if .env file exists
-ls -la .env
-
-# Verify variable syntax
-cat .env
-
-# Test Flask configuration
-python -c "import os; from dotenv import load_dotenv; load_dotenv(); print(os.getenv('SECRET_KEY'))"
-```
-
-#### Port Conflicts
-```bash
-# Check what's using port 5000
-lsof -i :5000
-
-# Kill conflicting processes
-kill -9 <PID>
-
-# Use different port
-flask run --port 5001
-```
-
-#### Docker Issues
-```bash
-# Rebuild containers
-docker-compose down
-docker-compose up --build --force-recreate
-
-# Check container logs
-docker-compose logs app
-
-# Clean up unused images
-docker system prune -f
-```
-
-
