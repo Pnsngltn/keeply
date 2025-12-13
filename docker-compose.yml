@@ -1,3 +1,6 @@
+# This was setup by Copilot 
+# At this point i just wanted to get the container working
+
 services:
   app:
     build: .
