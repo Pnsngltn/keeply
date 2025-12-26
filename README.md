@@ -1,4 +1,16 @@
-# Keeply
+
+  ░██     ░██                                  ░██
+  ░██    ░██                                   ░██
+  ░██   ░██    ░███████   ░███████  ░████████  ░██ ░██    ░██
+  ░███████    ░██    ░██ ░██    ░██ ░██    ░██ ░██ ░██    ░██
+  ░██   ░██   ░█████████ ░█████████ ░██    ░██ ░██ ░██    ░██
+  ░██    ░██  ░██        ░██        ░███   ░██ ░██ ░██   ░███
+  ░██     ░██  ░███████   ░███████  ░██░█████  ░██  ░█████░██
+                                    ░██                   ░██
+  ╻ ╻╻╺┳╸╻ ╻   ┏━╸┏━┓┏━╸┏━┓         ░██              ░███████
+  ┃╻┃┃ ┃ ┣━┫   ┃  ┗━┓┗━┓┃┃┃
+  ┗┻┛╹ ╹ ╹ ╹   ┗━╸┗━┛┗━┛┗━┛
+
 #### Video Demo: <>
 
 [![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)](https://www.python.org/)
@@ -7,36 +19,33 @@
 
 ## Project Overview
 
-**Keeply** is a comprehensive web-based appointment booking system built with Flask that enables service providers to manage their schedules and allows clients to book appointments directly through personalized booking pages.
+**Keeply** is a simple web-based appointment booking system built with Flask that enables service providers to manage their schedules and allows clients to book appointments directly through personalized booking links.
 
 ### Project Origin and Purpose
 
-This project began with a practical need: my girlfriend required a professional booking page for her body piercing business where clients could view available time slots and book appointments independently. The goal was to create a self-service booking system that would reduce administrative overhead while providing a professional client experience.
+This project began with a practical need: my girlfriend required a professional booking page for her body piercing business where clients could view available time slots and book appointments independently. The goal was to create a booking system that would reduce administrative overhead while providing a professional client experience.
 
-The project evolved into a multi-tenant SaaS-style application where:
+The idea eventually evolved into a SaaS-style application where:
 - Multiple service providers can register for independent accounts
 - Each provider gets their own booking interface and dashboard
 - Clients can book appointments through personalized URLs (e.g., `/username`)
 - Providers have complete control over their services, availability, and appointments
 
+The application is still in it's infancy when it comes to design. There is still a lot of front-end to test, implement and polish. 
+I wanted it to at least show what the basic idea was. This should be a continuous process to be continued after CS50.
+
 ### Current Deployment
 
-The application is currently running on Ubuntu Server via Docker containers, hosted on a custom domain (keeply.bitwerk.dev). This setup provides a real-world production environment for testing and development while maintaining scalability for future growth.
-
----
-
-## Demo
-![Keeply Dashboard Placeholder](screenshots/dashboard.png)
-*Placeholder screenshot: Dashboard showing appointments and availability.*
+The application is currently running on Ubuntu Server via Docker containers, hosted on a custom domain (keeply.bitwerk.dev). I'm using Gunicorn to serve my flask app (with 4 workers at the moment). Then to actually give it internet exposure i was trying to just open ports on my home router, but then Chatgpt told me about Cloudflare and their tunnels. It makes thing safer, and a lot simpler. It provides me with a bit of abstraction so that i don't have to do this the harder way.
+This setup provides me with a more realistic production environment for testing and development while, hopefuly, maintaining scalability and a path for future growth.
 
 ---
 
 ## Core Features
 
 ### User Management & Authentication
-- **User Registration**: Complete account creation with email validation and secure password hashing
+- **User Registration**: A simple account creation with email validation and basic password hashing
 - **Secure Login System**: Session-based authentication with CSRF protection
-- **Profile Management**: Users can update personal information and manage account settings
 
 ### Service Management
 - **Service Creation**: Providers can define multiple services with custom names, descriptions, and pricing
@@ -45,9 +54,8 @@ The application is currently running on Ubuntu Server via Docker containers, hos
 
 ### Availability Management
 - **Time Slot Generation**: Bulk creation of available time slots with customizable duration
-- **Conflict Detection**: Automatic prevention of overlapping time slots using mathematical interval overlap detection
+- **Conflict Detection**: Slot overlap detection
 - **Visual Interface**: Interactive form with real-time preview of generated slots
-- **Smart Validation**: Prevents time slot creation without associated services
 
 ### Client Booking System
 - **Multi-Step Booking Wizard**: Guided 4-step process (Service → Date → Time → Client Info)
@@ -63,42 +71,44 @@ The application is currently running on Ubuntu Server via Docker containers, hos
 
 ### Security Features
 - **CSRF Protection**: Cross-Site Request Forgery protection on all forms and API endpoints
-- **Password Security**: Werkzeug-based password hashing with salt
-- **Session Management**: Secure filesystem-based sessions with automatic expiration
+- **Password Security**: Werkzeug-based password hashing
+- **Session Management**: Secure filesystem-based sessions
 - **SQL Injection Prevention**: Parameterized queries throughout the application
 
 ### Communication System
 - **Email Notifications**: Asynchronous email sending for new appointments
 - **Provider Alerts**: Automatic email notifications when clients book appointments
-- **Best-Effort Delivery**: Non-blocking email system that doesn't affect user experience
 
 ---
 
-## Technical Architecture
+## Tech Stack
 
-### Backend Technology Stack
-- **Python 3.11**: Core programming language with modern features
-- **Flask 2.3.3**: Lightweight web framework with extensive ecosystem
-- **SQLite**: File-based database system for simplicity and portability
-- **CS50 SQL Library**: Educational SQL wrapper with security features
+### Backend Stack
 
-# Note: Python 3.12+ users may need to install setuptools first:
-# pip install setuptools
-# This fixes CS50 compatibility with newer Python versions
+Here i used the same tools used in the Finance problem-set.
+
+- **Python 3.11**
+- **Flask 2.3.3**
+- **SQLite**
+- **CS50 SQL Library** 
+
+I want to migrate my database to PostgreSQL in the future. For now, SQLite does what i require.
+
+# Note: I have found compatibility issues with Python 3.12+ 
 
 ### Flask Extensions & Libraries
-- **Flask-Session 0.5.0**: Server-side session management with filesystem storage
-- **Flask-Mail 0.9.1**: Asynchronous email sending with SMTP support
-- **Flask-WTF 1.1.1**: CSRF protection and secure form handling
-- **Werkzeug 2.3.7**: WSGI utilities and security functions (password hashing)
-- **python-dotenv 1.0.0**: Environment variable management for configuration
-- **Gunicorn 23.0.0**: Production WSGI server for deployment
+- **Flask-Session 0.5.0**
+- **Flask-Mail 0.9.1**
+- **Flask-WTF 1.1.1**
+- **Werkzeug 2.3.7**
+- **python-dotenv 1.0.0**
+- **Gunicorn 23.0.0**
 
 ### Frontend Technology Stack
-- **HTML5**: Semantic markup with modern web standards
-- **CSS3**: Custom styling with responsive design principles
-- **JavaScript (ES6+)**: Modern JavaScript with async/await and fetch API
-- **Bootstrap 5.3**: Professional UI framework with responsive grid system
+- **HTML5**
+- **CSS3**
+- **JavaScript (ES6+)**
+- **Bootstrap 5.3**
 
 ### Database Design
 - **Relational Model**: Five interconnected tables with foreign key relationships
@@ -112,45 +122,36 @@ The application is currently running on Ubuntu Server via Docker containers, hos
 ```
 keeply/
 │
-├─ Core Application Files
-│ ├─ app.py              # Main Flask application with all routes and API endpoints
-│ ├─ helper.py            # Utility functions (login_required decorator, conflict detection)
-│ ├─ wsgi.py              # WSGI entry point for production deployment
-│ ├─ schema.sql           # Complete database schema with table definitions
-│ └─ requirements.txt      # Python dependencies with version pinning
+├─ app.py
+├─ helper.py
+├─ wsgi.py
+├─ schema.sql
+├─ requirements.txt
+├─ README.md
+├─ TODO.md
+├─ Dockerfile
+├─ docker-compose.yml
+├─ .gitignore
+├─ .env
 │
-├─ Configuration & Deployment
-│ ├─ .env                 # Environment variables (not in version control)
-│ ├─ .gitignore           # Git ignore rules for sensitive files
-│ ├─ Dockerfile            # Container configuration for production deployment
-│ └─ docker-compose.yml    # Multi-service orchestration with Cloudflare tunnel
-│
-├─ Templates/ (HTML Views)
-│ ├─ layout.html          # Base template with Bootstrap and common structure
-│ ├─ header.html           # Navigation component with authentication state
-│ ├─ index.html           # Landing page with application overview
-│ ├─ login.html           # User authentication form
-│ ├─ register.html        # New user registration with validation
-│ ├─ dashboard.html        # Main admin interface with appointment management
-│ ├─ profile.html         # User profile and service management
-│ ├─ availability.html     # Time slot creation with conflict detection
-│ ├─ book.html            # Client booking wizard with multi-step process
-│ └─ success.html         # Booking confirmation page
-│
-├─ Static/ (Client-Side Assets)
-│ ├─ stylesheet.css       # Custom CSS styling and responsive design
+├─ static/
+│ ├─ stylesheet.css
 │ └─ js/
-│    ├─ helpers.js        # Availability form interactivity and validation
-│    ├─ book.js           # Client booking wizard with API integration
-│    └─ dashboard.js      # Dashboard functionality and status updates
+│    ├─ helpers.js
+│    ├─ book.js
+│    └─ dashboard.js
 │
-├─ Documentation
-│ ├─ README.md            # This comprehensive project documentation
-│ ├─ CODE_DOCUMENTATION.md # Detailed code explanation and architecture guide
-│ └─ CODE_DOCUMENTATION.txt # Plain text version of code documentation
-│
-└─ Data
-   └─ books.db            # SQLite database file (created from schema.sql)
+└─ templates/
+   ├─ layout.html
+   ├─ header.html
+   ├─ index.html
+   ├─ login.html
+   ├─ register.html
+   ├─ dashboard.html
+   ├─ profile.html
+   ├─ availability.html
+   ├─ book.html
+   └─ success.html
 ```
 ---
 
@@ -158,12 +159,12 @@ keeply/
 
 ### Core Application Files
 
-#### `app.py` - Main Flask Application (526 lines)
-This is the heart of the Keeply application containing all HTTP routes, API endpoints, and business logic.
+#### `app.py` - Main Flask Application
+This is the heart of the Keeply application containing all HTTP routes, API endpoints, and appointment/booking logic.
 
 **Key Components:**
 - **Flask Configuration**: Application setup with SECRET_KEY, CSRF protection, session management, and database connection
-- **Authentication Routes**: Complete user registration, login, logout system with secure password handling
+- **Authentication Routes**: User registration, login, logout system with secure password handling
 - **User Management**: Profile management and service creation functionality
 - **Dashboard System**: Comprehensive appointment management with status tracking
 - **Availability Management**: Time slot generation with mathematical conflict detection and validation
@@ -177,20 +178,19 @@ This is the heart of the Keeply application containing all HTTP routes, API endp
 - Handles both HTML form submissions and JSON API requests
 - Includes comprehensive error handling and user feedback
 
-#### `helper.py` - Utility Functions (19 lines)
+#### `helper.py` - Utility Functions
 Contains reusable helper functions that support the main application logic.
 
 **Functions:**
 - **`login_required(f)`**: Python decorator that protects routes by requiring user authentication
   - Wraps route functions to check session for valid user_id
   - Redirects unauthenticated users to login page
-  - Preserves function signatures and arguments
+
 - **`conflict(s1, e1, s2, e2)`**: Mathematical time overlap detection function
   - Determines if two time ranges intersect using interval arithmetic
   - Returns True if ranges overlap, False if they don't
-  - Used in availability management to prevent double-booking
 
-#### `wsgi.py` - Production Server Entry Point (5 lines)
+#### `wsgi.py` - Production Server Entry Point
 WSGI (Web Server Gateway Interface) configuration for production deployment.
 
 **Purpose:**
@@ -199,7 +199,7 @@ WSGI (Web Server Gateway Interface) configuration for production deployment.
 - Enables deployment behind reverse proxies (nginx, Apache)
 - Standard Python WSGI pattern for scalable deployments
 
-#### `schema.sql` - Database Schema Definition (60 lines)
+#### `schema.sql` - Database Schema Definition
 Complete SQLite database structure with normalized relational design.
 
 **Tables:**
@@ -225,136 +225,21 @@ Defines all required Python packages with exact version pinning for reproducible
 - **CS50 9.2.5**: Educational SQL library with security features
 - **Gunicorn 23.0.0**: Production WSGI server
 
-**Python 3.12+ Compatibility Note:**
-- **CS50 Issue**: CS50 9.2.5 may require `setuptools` for Python 3.12+
-- **Fix**: Run `pip install setuptools` before installing requirements
-- **Alternative**: Use Python 3.11 or wait for CS50 update
-
 #### `.env` - Environment Variables
-Configuration file for sensitive data and deployment settings (not in version control).
+Configuration file for sensitive data and deployment settings (not in version control). I will still need to find a better way to keep this information. This is not the best, safest, way.
 
 **Variables:**
 - **SECRET_KEY**: Flask session security and CSRF token generation
 - **Mail Configuration**: SMTP settings for email notifications
 - **Database Settings**: Connection parameters and security options
 
-#### `Dockerfile` - Container Configuration (12 lines)
+#### `Dockerfile` - Container Configuration
 Docker container definition for consistent deployment environments.
-
-**Features:**
-- Multi-stage build for optimized image size
-- Python 3.11-slim base image for efficiency
-- Gunicorn production server configuration
-- Security best practices with non-root execution
-
-#### `docker-compose.yml` - Multi-Service Orchestration (28 lines)
-Defines complete application stack with external access via Cloudflare tunnel.
-
-**Services:**
-- **app**: Main Flask application with database persistence
-- **cloudflared**: External access tunnel for public availability
-- Network isolation and service dependencies
-
-### Frontend Templates
-
-#### `templates/layout.html` - Base Template (32 lines)
-Foundation template providing consistent HTML structure across all pages.
-
-**Components:**
-- **Bootstrap 5.3 Integration**: CSS framework for responsive design
-- **CSRF Token Meta Tag**: Security for AJAX requests
-- **Template Inheritance**: Block system for page-specific content
-- **Navigation Integration**: Header component inclusion
-
-#### `templates/header.html` - Navigation Component
-Dynamic navigation that adapts based on user authentication state.
-
-**Features:**
-- **Authentication-Aware**: Shows different options for logged-in vs. logged-out users
-- **Bootstrap Navigation**: Responsive navbar with mobile support
-- **Route Links**: Direct access to dashboard, profile, and logout
-
-#### `templates/index.html` - Landing Page
-Main landing page providing application overview and user onboarding.
-
-**Purpose:**
-- **Marketing Content**: Application features and benefits
-- **Call-to-Action**: Registration and login prompts
-- **Professional Presentation**: First impression for potential users
-
-#### `templates/login.html` - Authentication Form
-User login interface with security features and validation.
-
-**Features:**
-- **CSRF Protection**: Hidden token field for security
-- **Form Validation**: Client and server-side validation
-- **Error Handling**: Clear feedback for authentication failures
-- **Responsive Design**: Mobile-friendly form layout
-
-#### `templates/register.html` - User Registration
-Complete new user registration with comprehensive validation.
-
-**Validation:**
-- **Required Fields**: Username, email, phone, password, confirmation
-- **Uniqueness Checks**: Server-side validation for username and email
-- **Password Matching**: Client and server-side confirmation validation
-- **CSRF Protection**: Secure form submission
-
-#### `templates/dashboard.html` - Admin Interface (Complex)
-Main administrative interface for appointment and service management.
-
-**Features:**
-- **Appointment Table**: Comprehensive view with client details and service information
-- **Status Management**: Interactive buttons for confirm, cancel, finish operations
-- **Service Overview**: Quick access to service management
-- **AJAX Integration**: Real-time status updates without page reload
-
-#### `templates/profile.html` - User Profile Management
-User information display and service creation interface.
-
-**Functionality:**
-- **Profile Display**: Shows username, email, phone (read-only)
-- **Service Creation**: Form for adding new services with validation
-- **Service List**: Display of existing services with management options
-- **Error Handling**: Form validation with user feedback
-
-#### `templates/availability.html` - Time Slot Management
-Interactive interface for creating and managing available time slots.
-
-**Advanced Features:**
-- **Conditional Display**: Shows form only if user has services (prevents confusion)
-- **Real-time Preview**: JavaScript-powered preview of slots to be created
-- **Conflict Prevention**: Backend validation against existing slots
-- **Visual Feedback**: Color-coded duration warnings and slot previews
-- **Bulk Operations**: Multiple slot creation and deletion capabilities
-
-#### `templates/book.html` - Client Booking Wizard
-Multi-step booking process for client appointments.
-
-**Booking Flow:**
-1. **Service Selection**: Dynamic loading of provider's services with pricing
-2. **Date Selection**: Available dates with free time slots only
-3. **Time Selection**: Specific available time slots for chosen date
-4. **Client Information**: Contact details collection with validation
-5. **Confirmation**: Success message with booking details
-
-**Technical Features:**
-- **Progressive Enhancement**: Works without JavaScript, enhanced with it
-- **API Integration**: Real-time data loading via REST endpoints
-- **CSRF Protection**: Secure AJAX form submission
-- **Responsive Design**: Mobile-friendly booking interface
-
-#### `templates/success.html` - Booking Confirmation
-Simple confirmation page displayed after successful appointment booking.
-
-**Purpose:**
-- **Success Feedback**: Clear confirmation of completed booking
-- **Professional Presentation**: Maintains application branding
-- **User Guidance**: Options for next actions
+To be honest, Copilot (i think) wrote the Dockerfile and all files related to Docker.  
 
 ### Client-Side JavaScript
 
-#### `static/js/helpers.js` - Availability Form Enhancement (108 lines)
+#### `static/js/helpers.js` - Availability Form Enhancement
 Provides interactive functionality for the time slot creation form.
 
 **Key Functions:**
@@ -367,10 +252,9 @@ Provides interactive functionality for the time slot creation form.
 **User Experience:**
 - **Instant Feedback**: Real-time updates as user types
 - **Smart Defaults**: Intelligent duration suggestions based on time range
-- **Error Prevention**: Blocks invalid selections before form submission
 
-#### `static/js/book.js` - Booking Wizard Controller (108 lines)
-Manages the complete client booking process with API integration.
+#### `static/js/book.js` - Booking Wizard Controller
+Manages the complete client booking process with API integration. At first i was just using a multi-step form using javascript to hide or show certain stages of the process. But then i read about API endpoints, and realized (with some artificial guidance) that i could use this to make my booking form more robust.
 
 **Process Management:**
 - **Step-by-Step Navigation**: Controls visibility of booking stages
@@ -381,7 +265,6 @@ Manages the complete client booking process with API integration.
 **Security Features:**
 - **CSRF Token Handling**: Reads token from meta tag for AJAX requests
 - **Data Validation**: Client-side validation before submission
-- **Error Handling**: Graceful handling of network failures
 
 #### `static/js/dashboard.js` - Dashboard Interactivity
 Handles administrative functions in the dashboard interface.
@@ -390,7 +273,6 @@ Handles administrative functions in the dashboard interface.
 - **Status Updates**: AJAX calls for appointment status changes
 - **Bulk Operations**: Multiple appointment management
 - **User Feedback**: Real-time updates without page refresh
-- **Confirmation Dialogs**: User verification for destructive actions
 
 #### `static/stylesheet.css` - Application Styling
 Custom CSS providing application-specific styling beyond Bootstrap defaults.
@@ -400,224 +282,4 @@ Custom CSS providing application-specific styling beyond Bootstrap defaults.
 - **Professional Appearance**: Business-appropriate color scheme and typography
 - **Accessibility**: Proper contrast ratios and keyboard navigation
 - **Brand Consistency**: Unified visual language across all pages
-
-## Installation & Setup Guide
-
-### Prerequisites
-- **Python 3.11+**: Required for modern syntax and type hints
-- **Git**: For version control and repository cloning
-- **Docker & Docker Compose**: For containerized deployment (optional)
-- **Text Editor/IDE**: For code development and modification
-
-### Local Development Setup
-
-#### Step 1: Repository Setup
-```bash
-# Clone the repository
-git clone https://github.com/Pnsngltn/keeply.git
-cd keeply
-
-# Verify repository structure
-ls -la  # Should show app.py, templates/, static/, etc.
-```
-
-#### Step 2: Python Virtual Environment
-```bash
-# Create virtual environment
-python3 -m venv venv
-
-# Activate environment (Mac/Linux)
-source venv/bin/activate
-
-# Activate environment (Windows)
-venv\Scripts\activate
-
-# Verify activation (should show (venv) in prompt)
-which python
-```
-
-#### Step 2.5: Python 3.12+ Compatibility Fix
-```bash
-# IMPORTANT: If using Python 3.12+, install setuptools first
-# This fixes CS50 library compatibility with newer Python versions
-pip install setuptools
-
-# Verify setuptools installation
-python -c "import setuptools; print('setuptools OK')"
-```
-
-#### Step 3: Dependency Installation
-```bash
-# Install required packages with exact versions
-pip install -r requirements.txt
-
-# Verify installation
-pip list  # Should show Flask, CS50, etc.
-
-# IMPORTANT: If using Python 3.12+, install setuptools first
-# This fixes CS50 library compatibility with newer Python versions
-pip install setuptools
-```
-
-#### Step 4: Environment Configuration
-```bash
-# Create environment file (if not exists)
-touch .env
-
-# Edit .env file with required variables
-nano .env  # or use your preferred editor
-```
-
-**Required Environment Variables:**
-```bash
-# Flask Configuration
-SECRET_KEY=your-secret-key-here-generate-random-string
-
-# Email Configuration (for appointment notifications)
-MAIL_SERVER=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USE_TLS=True
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-specific-password
-MAIL_DEFAULT_SENDER=your-email@gmail.com
-```
-
-#### Step 5: Database Initialization
-```bash
-# Initialize SQLite database from schema
-sqlite3 books.db < schema.sql
-
-# Verify database creation
-ls -la books.db  # Should show database file
-sqlite3 books.db ".tables"  # Should show all tables
-```
-
-#### Step 6: Run Development Server
-```bash
-# Start Flask development server
-flask run
-
-# Alternative: Run with Python directly
-python app.py
-
-# Application will be available at:
-# http://localhost:5000
-```
-
-### Docker Production Setup
-
-#### Step 1: Environment Preparation
-```bash
-# Ensure Docker is installed
-docker --version
-docker-compose --version
-
-# Clone repository (if not done)
-git clone https://github.com/Pnsngltn/keeply.git
-cd keeply
-```
-
-#### Step 2: Environment Configuration
-```bash
-# Create production environment file
-cp .env.example .env  # if example exists
-# Edit .env with production values
-```
-
-#### Step 3: Container Deployment
-```bash
-# Build and start all services
-docker-compose up --build
-
-# Run in background (detached mode)
-docker-compose up --build -d
-
-# View logs
-docker-compose logs -f app
-```
-
-#### Step 4: Access Verification
-```bash
-# Check if services are running
-docker-compose ps
-
-# Test application locally
-curl http://localhost:8000
-
-# Access via browser
-# http://localhost:8000
-```
-
-### Production Deployment Considerations
-
-#### Security Configuration
-- **SECRET_KEY**: Use strong, randomly generated string (32+ characters)
-- **Database**: Regular backups of books.db file
-- **Email**: Use app-specific passwords, not main account passwords
-- **HTTPS**: Configure reverse proxy with SSL/TLS termination
-
-#### Performance Optimization
-- **Gunicorn**: Production WSGI server (configured in docker-compose.yml)
-- **Worker Processes**: Multiple Gunicorn workers for concurrency
-- **Database Indexing**: Ensure proper indexes on frequently queried columns
-- **Static Files**: Serve via CDN or reverse proxy in production
-
-#### Monitoring & Maintenance
-- **Application Logs**: Monitor docker-compose logs for errors
-- **Resource Usage**: Monitor CPU, memory, and disk usage
-- **Regular Updates**: Keep dependencies updated for security
-- **Backup Strategy**: Automated database backups and version control
-
-### Troubleshooting Common Issues
-
-#### Database Connection Problems
-```bash
-# Check if database file exists
-ls -la books.db
-
-# Verify database permissions
-sqlite3 books.db ".schema"
-
-# Recreate database if corrupted
-rm books.db
-sqlite3 books.db < schema.sql
-```
-
-#### Environment Variable Issues
-```bash
-# Check if .env file exists
-ls -la .env
-
-# Verify variable syntax
-cat .env
-
-# Test Flask configuration
-python -c "import os; from dotenv import load_dotenv; load_dotenv(); print(os.getenv('SECRET_KEY'))"
-```
-
-#### Port Conflicts
-```bash
-# Check what's using port 5000
-lsof -i :5000
-
-# Kill conflicting processes
-kill -9 <PID>
-
-# Use different port
-flask run --port 5001
-```
-
-#### Docker Issues
-```bash
-# Rebuild containers
-docker-compose down
-docker-compose up --build --force-recreate
-
-# Check container logs
-docker-compose logs app
-
-# Clean up unused images
-docker system prune -f
-```
-
 

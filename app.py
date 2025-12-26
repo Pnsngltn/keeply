@@ -247,7 +247,7 @@ def dashboard():
     services = db.execute("SELECT * FROM services WHERE user_id = ?", user_id)
 
     # Get appointments with client and service details
-    # .. I had help from Copilot to make this query more efficient ..
+    # .. I had help from Copilot in designing this query ..
     appointments = db.execute("""
         SELECT 
             a.id,
@@ -279,11 +279,11 @@ def dashboard():
 @login_required
 def availability():
     """
-    Set the available timeslots
-    
-    I'm having issues with the logic for how to store and acess timeslots
-    The logic i use below was mostly given to me by Copilot
-    Unclear - Overcomplicated (hopefully)
+    Set available timeslots
+
+    I was having issues with the logic for how to store and acess timeslots
+    I got to the logic i use bellow with the help of Copilot
+    I find it overcomplicated (it hopefully is)
     """
 
     user_id = session["user_id"]
@@ -292,6 +292,7 @@ def availability():
         # Check if user has any services already
         services = db.execute("SELECT COUNT(*) as count FROM services WHERE user_id = ?", user_id)
         if services[0]["count"] == 0:
+            # If they don't, ask them to create some
             return render_template(
                     "availability.html",
                     error="You must add services before setting up availability. <a href='/profile'> Create Services Here</a>",
@@ -303,6 +304,7 @@ def availability():
         end = request.form.get("time_end")
         duration = request.form.get("duration")
 
+        # Make sure all inputs are provided
         if not date or not start or not end or not duration:
             return render_template(
                 "availability.html",
@@ -310,18 +312,21 @@ def availability():
                 slots=db.execute("SELECT * FROM timeslots where user_id = ? ORDER BY date, time_start", user_id),
                 has_services=True
             )
+
+        # Make sure duration is an integer (in minutes)
         duration = int(duration)
 
-        # Convert to minutes since midnight
+        # Convert start and end time to minutes from midnight
         sh, sm = map(int, start.split(":"))
         eh, em = map(int, end.split(":"))
         start_min = sh * 60 + sm
         end_min = eh * 60 + em
 
         # Handle wrap around midnight
+        # Total minutes represents the amount of time between the start and the end of the 'shift'
         total_minutes = end_min - start_min if end_min > start_min else (24 * 60 - start_min) + end_min
 
-        # Find existing slots for that date
+        # Find existing slots for the specified date
         existing = db.execute("SELECT time_start, time_end FROM timeslots WHERE user_id = ? AND date = ?", user_id, date)
 
         existing_ranges = []
@@ -333,37 +338,43 @@ def availability():
         # Generate slots and check conflicts
         current = start_min 
         created, conflicts = 0, 0 
+        # Create slots while there is still time to allocate
         while total_minutes > 0:
-            next_slot = (current + duration) % (24 * 60)
-            slot_start = current
-            slot_end = next_slot
+            next_slot = (current + duration) % (24 * 60)    # Find the beginning of the next slot
+            slot_start = current    # Define the start of the current slot
+            slot_end = next_slot    # The end of the current slot is the start of the next
 
+            # Here i use conflict() in helper.py to check if the current time slot conflict with another existing one
             has_conflict = any(conflict(slot_start, slot_end, s, e) for s, e in existing_ranges)
 
             if has_conflict:
                 conflicts += 1
-            else:
+            else:    # If there are no conflicts we can store the slot in the database
                 slot_start_str = f"{slot_start // 60:02d}:{slot_start % 60:02d}"
                 slot_end_str = f"{slot_end // 60:02d}:{slot_end % 60:02d}"
                 db.execute("INSERT INTO timeslots (user_id, date, time_start, time_end, duration) VALUES (?, ?, ?, ?, ?)",
                     user_id, date, slot_start_str, slot_end_str, duration
                            )
-                created += 1
-            total_minutes -= duration
-            current = next_slot
+                created += 1    # Increment the 'created' counter
+            total_minutes -= duration    # Subtract from the amount of allocated time
+            current = next_slot    # Make sure current now point at the start of the next slot
 
+        # Update the list of created slots
         slots = db.execute("SELECT * FROM timeslots WHERE user_id = ? ORDER BY date, time_start", user_id)
 
         message = f"{created} slots created."
 
+        # Let the user know that some slots had conflicts
         if conflicts > 0:
             message += f"{conflicts} conflicted with existing ones."
 
+        # Refresh the page to show the message and the newly created slots
         return render_template("availability.html", success=message, slots=slots, has_services=True)
 
     # GET requests
     services = db.execute("SELECT COUNT(*) as count FROM services WHERE user_id = ?", user_id)
-    has_services = services[0]["count"] > 0
+
+    has_services = services[0]["count"] > 0    # Just to tell the page if the user has services already or not
 
     if has_services:
         slots = db.execute("SELECT * FROM timeslots WHERE user_id = ? ORDER BY date, time_start", user_id)
@@ -379,28 +390,28 @@ def availability():
 @app.route("/book/<username>")
 def book(username):
     provider = db.execute("SELECT id, email FROM users WHERE username = ?", username)
-    if len(provider) == 0:
-        return "Provider not found", 404     # Change later
+
+    if len(provider) == 0:    # Make sure a valid url was provided
+        return "Provider not found", 404     # Change to a more standard error page (Like the apology page in Finance)
+
     return render_template("book.html", username=username, user_id=provider[0]["id"])
 
 # ==============================================================================
 # ::::::: API Endpoints for JS Form ::::::::::::::::::::::::::::::::::::::::::::
 # ==============================================================================
 
-@app.route("/api/services/<int:user_id>")
+@app.route("/api/services/<int:user_id>")    # An API Endpoint to query the database for all the services a user provides
 def api_services(user_id):
-    # fixed stray comma in SELECT
     services = db.execute("SELECT id, name, price FROM services WHERE user_id = ?", user_id)
     return jsonify(services)
 
-@app.route("/api/dates/<int:user_id>")
+@app.route("/api/dates/<int:user_id>")    # This one queries for all currently available dates
 def api_date(user_id):
-    # Fix SQL syntax: remove stray AND before ORDER BY
     dates = db.execute("SELECT DISTINCT date FROM timeslots WHERE user_id = ? AND status = 'Free' ORDER BY date",
                        user_id)
     return jsonify([d['date'] for d in dates])
 
-@app.route("/api/timeslots/<int:user_id>/<date>")
+@app.route("/api/timeslots/<int:user_id>/<date>")    # Provided with a date, this one returns all timeslots available
 def api_timeslots(user_id, date):
     slots = db.execute("SELECT id, time_start, time_end FROM timeslots WHERE user_id = ? AND status = 'Free' AND date = ? ORDER BY time_start", 
                        user_id, date)
@@ -410,12 +421,12 @@ def api_timeslots(user_id, date):
 # ======= API Endpoint for Appointment Status Update ===========================
 # ------------------------------------------------------------------------------
 
-@app.route("/api/appointment/status", methods=["POST"])
+@app.route("/api/appointment/status", methods=["POST"])    # This Endpoint allows users to alter the status of appointments
 @login_required
 def update_appointment_status():
     """Update appointment status (confirm, cancel, finish)"""
     data = request.json
-    if not data or "appointment_id" not in data or "status" not in data:
+    if not data or "appointment_id" not in data or "status" not in data:    # Make sure an appointments was properly selected
         return jsonify({"error": "Missing required fields"}), 400
 
     appointment_id = data["appointment_id"]
@@ -508,7 +519,7 @@ def delete_timeslots():
 # ======= API Endpoints for Booking ============================================
 # ------------------------------------------------------------------------------
 
-@app.route("/api/book", methods=["POST"])
+@app.route("/api/book", methods=["POST"])    # Where the 'Magic' happens
 def api_book():
     data = request.json
     user_id = data["user_id"]
