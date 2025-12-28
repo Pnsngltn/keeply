@@ -39,6 +39,8 @@
         <div class="card">
             <div class="card-header">
                 <h3 class="mb-3">Appointments</h3>
+
+		<!-- Tab Buttons -->
                 <ul class="nav nav-tabs card-header-tabs" id="appointmentTabs" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="true">
@@ -55,11 +57,17 @@
                             Finished
                         </button>
                     </li>
+		    <li class="nav-item" role="presentation">
+			<button class="nav-link" id="cancelled-tab" data-bs-toggle="tab" data-bs-target="#cancelled" type="button" role="tab" aria-controls="cancelled" aria-selected="false">
+			    Cancelled
+			</button>
+		    </li>
                 </ul>
             </div>
             <div class="card-body">
                 <div class="tab-content" id="appointmentTabsContent">
-                    <!-- Pending Appointments -->
+
+                    <!-- Pending Appointments Tab -->
                     <div class="tab-pane fade show active" id="pending" role="tabpanel" aria-labelledby="pending-tab">
                         <div class="table-responsive">
                             <table class="table">
@@ -73,7 +81,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for a in appointments if a.status == 'pending' %}
+                                    {% for a in appointments if a.status == "Pending" %}
                                     <tr>
                                         <td>{{ a.client_name }}</td>
                                         <td>{{ a.service_name }}</td>
@@ -94,7 +102,7 @@
                         </div>
                     </div>
 
-                    <!-- Confirmed Appointments -->
+                    <!-- Confirmed Appointments Tab -->
                     <div class="tab-pane fade" id="confirmed" role="tabpanel" aria-labelledby="confirmed-tab">
                         <div class="table-responsive">
                             <table class="table">
@@ -108,7 +116,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for a in appointments if a.status == 'confirmed' %}
+                                    {% for a in appointments if a.status == "Confirmed" %}
                                     <tr>
                                         <td>{{ a.client_name }}</td>
                                         <td>{{ a.service_name }}</td>
@@ -129,7 +137,7 @@
                         </div>
                     </div>
 
-                    <!-- Finished Appointments -->
+                    <!-- Finished Appointments Tab -->
                     <div class="tab-pane fade" id="finished" role="tabpanel" aria-labelledby="finished-tab">
                         <div class="table-responsive">
                             <table class="table">
@@ -142,7 +150,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for a in appointments if a.status == 'finished' %}
+                                    {% for a in appointments if a.status == "Finished" %}
                                     <tr>
                                         <td>{{ a.client_name }}</td>
                                         <td>{{ a.service_name }}</td>
@@ -154,6 +162,33 @@
                             </table>
                         </div>
                     </div>
+
+		    <!-- Cancelled Appointments Tab --> 
+		    <div class="tab-pane fade" id="cancelled" role="tabpanel" aria-labelledby="cancelled-tab">
+		        <div class="table-responsive">
+			    <table class="table">
+				<thead>
+				    <tr>
+					<th>Client</th>
+					<th>Service</th>
+					<th>Date</th>
+					<th>Time</th>
+				    </tr>
+				</thead>
+				<tbody>
+				    {% for a in appointments if a.status == "Cancelled" %}
+                                    <tr>
+					<td>{{ a.client_name }}</td>
+					<td>{{ a.service_name }}</td>
+					<td>{{ a.date }}</td>
+					<td>{{ a.time_start }} - {{ a.time_end }}</td>
+				    </tr>
+				    {% endfor %}
+				</tbody>
+			    </table>
+			</div>
+		    </div>
+
                 </div>
             </div>
         </div>

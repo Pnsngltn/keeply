@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle confirm button clicks
     document.querySelectorAll('.btn-confirm').forEach(button => {
         button.addEventListener('click', () => {
-            updateAppointmentStatus(button.dataset.appointmentId, 'confirmed');
+            updateAppointmentStatus(button.dataset.appointmentId, 'Confirmed');
         });
     });
 
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.btn-cancel').forEach(button => {
         button.addEventListener('click', () => {
             if (confirm('Are you sure you want to cancel this appointment?')) {
-                updateAppointmentStatus(button.dataset.appointmentId, 'cancelled');
+                updateAppointmentStatus(button.dataset.appointmentId, 'Cancelled');
             }
         });
     });
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle finish button clicks
     document.querySelectorAll('.btn-finish').forEach(button => {
         button.addEventListener('click', () => {
-            updateAppointmentStatus(button.dataset.appointmentId, 'finished');
+            updateAppointmentStatus(button.dataset.appointmentId, 'Finished');
         });
     });
 });

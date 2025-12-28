@@ -51,7 +51,7 @@ CREATE TABLE appointments (
     client_id INTEGER NOT NULL,
     slot_id INTEGER NOT NULL,
     service_id INTEGER NOT NULL,
-    status TEXT DEFAULT 'Pending', -- Pending, Confirmed and Finished
+    status TEXT DEFAULT 'Pending', -- Pending, Confirmed, Finished and Cancelled
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (client_id) REFERENCES clients(id),
     FOREIGN KEY (slot_id) REFERENCES timeslots(id),

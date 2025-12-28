@@ -448,7 +448,7 @@ def update_appointment_status():
     )
 
     # If cancelled, free up the timeslot
-    if new_status == "cancelled":
+    if new_status == "Cancelled":
         slot_id = db.execute(
             "SELECT slot_id FROM appointments WHERE id = ?",
             appointment_id
@@ -489,29 +489,29 @@ def delete_timeslots():
     user_id = session.get("user_id")
 
     # Find slots that belong to the user
-    placeholders = ",".join(["?"] * len(slot_ids))
-    rows = db.execute(f"SELECT id, status FROM timeslots WHERE id IN ({placeholders}) AND user_id = ?", *slot_ids, user_id)
+    p_holders = ",".join(["?"] * len(slot_ids))
+    rows = db.execute(f"SELECT id, status FROM timeslots WHERE id IN ({p_holders}) AND user_id = ?", *slot_ids, user_id)
     user_slot_ids = {r["id"]: r["status"] for r in rows}
 
     # Find slots that have appointments referencing them
-    appt_rows = db.execute(f"SELECT DISTINCT slot_id FROM appointments WHERE slot_id IN ({placeholders})", *slot_ids)
-    appt_slot_ids = {r["slot_id"] for r in appt_rows}
+    booked_rows = db.execute(f"SELECT DISTINCT slot_id FROM appointments WHERE slot_id IN ({p_holders})", *slot_ids)
+    booked_slot_ids = {r["slot_id"] for r in booked_rows}
 
     deletable = []
     not_deleted = []
-    for sid in slot_ids:
-        status = user_slot_ids.get(sid)
+    for s_id in slot_ids:
+        status = user_slot_ids.get(s_id)
         if status is None:
-            not_deleted.append({"id": sid, "reason": "not_owned"})
+            not_deleted.append({"id": s_id, "reason": "not_owned"})
             continue
-        if status == "Booked" or sid in appt_slot_ids:
-            not_deleted.append({"id": sid, "reason": "booked_or_has_appointment"})
+        if status == "Booked" or s_id in booked_slot_ids:
+            not_deleted.append({"id": s_id, "reason": "booked_or_has_appointment"})
             continue
-        deletable.append(sid)
+        deletable.append(s_id)
 
     if deletable:
-        ph = ",".join(["?"] * len(deletable))
-        db.execute(f"DELETE FROM timeslots WHERE id IN ({ph})", *deletable)
+        del_p_holders = ",".join(["?"] * len(deletable))
+        db.execute(f"DELETE FROM timeslots WHERE id IN ({del_p_holders})", *deletable)
 
     return jsonify({"deleted": deletable, "not_deleted": not_deleted})
 
@@ -543,7 +543,7 @@ def api_book():
     db.execute("""
         INSERT INTO appointments 
         (user_id, client_id, slot_id, service_id, status) 
-        VALUES (?, ?, ?, ?, 'pending')
+        VALUES (?, ?, ?, ?, 'Pending')
     """, user_id, client_id, slot_id, service_id)
     db.execute("UPDATE timeslots SET status = 'Booked' WHERE id = ?", slot_id)
 
