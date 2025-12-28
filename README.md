@@ -19,11 +19,14 @@
 
 ## Project Overview
 
-**Keeply** is a simple web-based appointment booking system built with Flask that enables service providers to manage their schedules and allows clients to book appointments directly through personalized booking links.
+**Keeply** is a simple web-based appointment booking system built with Flask that enables service providers to 
+manage their schedules and allows clients to book appointments directly through personalized booking links.
 
 ### Project Origin and Purpose
 
-This project began with a practical need: my girlfriend required a professional booking page for her body piercing business where clients could view available time slots and book appointments independently. The goal was to create a booking system that would reduce administrative overhead while providing a professional client experience.
+This project began with a practical need: my girlfriend required a professional booking page for her 
+body piercing business where clients could view available time slots and book appointments independently. 
+The goal was to create a booking system that would reduce administrative overhead while providing a professional client experience.
 
 The idea eventually evolved into a SaaS-style application where:
 - Multiple service providers can register for independent accounts
@@ -36,8 +39,12 @@ I wanted it to at least show what the basic idea was. This should be a continuou
 
 ### Current Deployment
 
-The application is currently running on Ubuntu Server via Docker containers, hosted on a custom domain (keeply.bitwerk.dev). I'm using Gunicorn to serve my flask app (with 4 workers at the moment). Then to actually give it internet exposure i was trying to just open ports on my home router, but then Chatgpt told me about Cloudflare and their tunnels. It makes thing safer, and a lot simpler. It provides me with a bit of abstraction so that i don't have to do this the harder way.
-This setup provides me with a more realistic production environment for testing and development while, hopefuly, maintaining scalability and a path for future growth.
+The application is currently running on Ubuntu Server via Docker containers, hosted on a custom domain (keeply.bitwerk.dev). 
+I'm using Gunicorn to serve my flask app (with 4 workers at the moment). Then, to actually give it internet exposure, i was trying 
+to just open ports on my home router, but then Chatgpt told me about Cloudflare and their tunnels. It makes thing safer, and a lot 
+simpler. It provides me with a bit of abstraction so that i don't have to do this the harder way.
+This setup provides me with a more realistic production environment for testing and development while, hopefuly, maintaining 
+scalability and a path for future growth.
 
 ---
 
@@ -137,7 +144,7 @@ keeply/
 ├─ static/
 │ ├─ stylesheet.css
 │ └─ js/
-│    ├─ helpers.js
+│    ├─ availability.js
 │    ├─ book.js
 │    └─ dashboard.js
 │
@@ -153,6 +160,40 @@ keeply/
    ├─ book.html
    └─ success.html
 ```
+---
+
+### Final Thoughts:
+
+This project has been an amazing learning experience for me. It gave me a much needed push to be on my
+way to, hopefully, becoming a software developer in the future.
+
+CS50 has provided me with a very well designed path through the basics of computer science. I think it
+gavee me a very solid understanding of the fundamentals as well as a knowledge of how to find the information i need
+to solve the problem already on the table.
+
+Although my available time to dedicate to this learning experience wasn't ideal (work hours were very long all year, so
+that made things difficult) i managed to learn a lot and, i think, create something of substance that i can now continue 
+to improve and grow. 
+
+For this particular project i decided to keep it simple when it came to the tech-stack (i used the one i already knew from 
+other problem sets) forcing myself to, instead of starting from the begginning, explore the tools i'd worked with to a deeper
+level. The introduction of a page with a custom name (using the users username to name the address for the page), more complex 
+SQL queries and a lot more Javascript.
+
+API Endpoints were a big time drain for me and also the part of the project where i seeked the most AI assistance. But, in the end
+i think they make the application more scalable and much easier to read and modify.
+
+One subject i find that i have to work on is organization. I found myself suffering from my own failure to comment things out and
+keeping Logs, Journals, etc. Since my time on the project was scarce i, a lot of times, would spend most time of my sessions reading 
+the code i wrote last session just to remmember where i was. I actually had to start over twice, i think, because it seemed simpler. 
+At these moments, some flashbacks of Professor David Mailan came to mind :P
+At some point, at one of these re-writes, i decided to take a break and go learn git. Which helped a bit. Altough i made a lot of 
+mistakes and 'ruined' the repo a couple times. I think the commit history might show that.
+
+On the serving and hosting side, i admit i used Big Pickle (im now using Opencode with Zen, directly from terminal) a lot to guide me.
+I really didn't know anything and now i know a little more. I'm really happy about it, and, mostly, very proud and quite a bit more
+confident in my abilities.
+
 ---
 
 ## Detailed File Descriptions
@@ -216,7 +257,7 @@ Complete SQLite database structure with normalized relational design.
 
 ### Configuration & Deployment Files
 
-#### `requirements.txt` - Python Dependencies (18 lines)
+#### `requirements.txt` - Python Dependencies
 Defines all required Python packages with exact version pinning for reproducible deployments.
 
 **Key Dependencies:**
@@ -226,7 +267,8 @@ Defines all required Python packages with exact version pinning for reproducible
 - **Gunicorn 23.0.0**: Production WSGI server
 
 #### `.env` - Environment Variables
-Configuration file for sensitive data and deployment settings (not in version control). I will still need to find a better way to keep this information. This is not the best, safest, way.
+Configuration file for sensitive data and deployment settings (not in version control). I will still need to 
+find a better way to keep this information. This is not the best, safest, way.
 
 **Variables:**
 - **SECRET_KEY**: Flask session security and CSRF token generation
@@ -239,7 +281,7 @@ To be honest, Copilot (i think) wrote the Dockerfile and all files related to Do
 
 ### Client-Side JavaScript
 
-#### `static/js/helpers.js` - Availability Form Enhancement
+#### `static/js/availability.js` - Availability Form Enhancement
 Provides interactive functionality for the time slot creation form.
 
 **Key Functions:**
@@ -254,7 +296,9 @@ Provides interactive functionality for the time slot creation form.
 - **Smart Defaults**: Intelligent duration suggestions based on time range
 
 #### `static/js/book.js` - Booking Wizard Controller
-Manages the complete client booking process with API integration. At first i was just using a multi-step form using javascript to hide or show certain stages of the process. But then i read about API endpoints, and realized (with some artificial guidance) that i could use this to make my booking form more robust.
+Manages the complete client booking process with API integration. At first i was just using a multi-step form 
+using javascript to hide or show certain stages of the process. But then i read about API endpoints, and realized 
+(with some artificial guidance) that i could use this to make my booking form more robust.
 
 **Process Management:**
 - **Step-by-Step Navigation**: Controls visibility of booking stages
@@ -276,10 +320,4 @@ Handles administrative functions in the dashboard interface.
 
 #### `static/stylesheet.css` - Application Styling
 Custom CSS providing application-specific styling beyond Bootstrap defaults.
-
-**Design Principles:**
-- **Responsive Design**: Mobile-first approach with breakpoints
-- **Professional Appearance**: Business-appropriate color scheme and typography
-- **Accessibility**: Proper contrast ratios and keyboard navigation
-- **Brand Consistency**: Unified visual language across all pages
 
