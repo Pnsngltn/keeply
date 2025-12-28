@@ -11,7 +11,7 @@
         ┃╻┃┃ ┃ ┣━┫   ┃  ┗━┓┗━┓┃┃┃
         ┗┻┛╹ ╹ ╹ ╹   ┗━╸┗━┛┗━┛┗━┛
 ```
-#### Video Demo: <>
+#### Video Demo: <https://youtu.be/fnVSLir8sE8>
 
 [![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-2.3-orange?logo=flask)](https://flask.palletsprojects.com/)
